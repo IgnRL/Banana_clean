@@ -1,0 +1,116 @@
+---
+title: "02_Alpha"
+author: "Ignacio Romero"
+date: "2026-01-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(phyloseq)
+library(tidyverse)
+library(vegan)
+library(rstatix)
+library(ggpubr)
+```
+
+
+## Plot colors
+```{r colors and order, include=FALSE}
+treat.colors <- c("control"  = "darkseagreen" , "chicken"= "royalblue1", "cow" = "red3","pellet"= "darkorchid1","compost"="chocolate4")
+
+time.colors <- c("#BFD3E6", "#9ECAE1", "#6BAED6", "#4292C6", "#2171B5", "#08519C")
+
+
+treat.order  <- c("control",  "chicken", "cow","compost", "pellet")
+treat.labels <- c("Control",  "Chicken\nmanure", "Cow\nmanure","Compost", "Pelletised\ncompost")
+
+treat.colors_ok <- c("Control"  = "darkseagreen" , "Chicken\nmanure"= "royalblue1", "Cow\nmanure" = "red3","Pelletised\ncompost"= "darkorchid1","Compost"="chocolate4")
+```
+
+## Load data
+
+```{r}
+zotu97 <- import_qiime("01_Raw_data/p1031_run231218_Revio_16S_ZOTU_c97_Count_Sintax.txt")
+
+metadata <- read.csv("01_Raw_data/metadata_2025.csv" ) %>% 
+  column_to_rownames(var= "sample_name")
+
+zotu97 <- merge_phyloseq(zotu97, sample_data(metadata))
+```
+
+
+## Alpha indexes
+
+```{r}
+richness <- specnumber(otu_table(zotu97), MARGIN=2)
+
+shannon <- diversity(otu_table(zotu97), MARGIN= 2)
+
+evenness <- shannon/richness
+
+div.index <- data.frame(cbind(richness, shannon, evenness))
+
+sample_table<- cbind(sample_data(zotu97), div.index)
+
+zotu97 <- merge_phyloseq(zotu97, sample_data(sample_table))
+
+sample_data(zotu97)
+```
+
+### Check indexes normality
+
+
+```{r shanon}
+sample_table %>% 
+  shapiro_test(shannon)
+
+ggqqplot(data=sample_table, "shannon", facet.by= "time")
+
+# The outliers are accounted for due to their low sequencing depth as seen in 01_introduction
+
+
+sample_table %>% 
+  group_by(treatment) %>%
+  shapiro_test(shannon)
+
+ggqqplot(data=sample_table, "shannon", facet.by= "treatment")
+# Same as above
+```
+
+```{r shanon}
+sample_table %>% 
+  shapiro_test(evenness)
+
+ggqqplot(data=sample_table, "evenness", facet.by= "time")
+
+# The outliers are accounted for due to their low sequencing depth as seen in 01_introduction
+
+
+sample_table %>% 
+  group_by(treatment) %>%
+  shapiro_test(evenness)
+
+ggqqplot(data=sample_table, "evenness", facet.by= "treatment")
+# Same as above
+```
+
+```{r richness}
+sample_table %>% 
+  shapiro_test(richness)
+
+ggqqplot(data=sample_table, "richness", facet.by= "time")
+
+# The outliers are accounted for due to their low sequencing depth as seen in 01_introduction
+
+
+sample_table %>% 
+  group_by(treatment) %>%
+  shapiro_test(richness)
+
+ggqqplot(data=sample_table, "richness", facet.by= "treatment")
+# Same as above
+```
