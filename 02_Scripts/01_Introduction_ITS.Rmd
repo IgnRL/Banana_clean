@@ -1,5 +1,5 @@
 ---
-title: "01_Introduction"
+title: "01_Introduction_ITS"
 author: "Ignacio Romero"
 date: "2026-01-14"
 output: html_document
@@ -12,21 +12,23 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Libraries
 
 ```{r}
+
 library(phyloseq)
 library(tidyverse)
 library(vegan)
 library(scales)
+library(ggplot2)
 ```
 
 
 ## Plot colors
 ```{r colors and order, include=FALSE}
-treat.colors <- c("control_amf"  = "darkseagreen" , "chicken"= "royalblue1", "cow" = "red3","pellet"= "darkorchid1","compost"="chocolate4")
+treat.colors <- c("control"  = "darkseagreen" , "chicken"= "royalblue1", "cow" = "red3","pellet"= "darkorchid1","compost"="chocolate4")
 
 time.colors <- c("#BFD3E6", "#9ECAE1", "#6BAED6", "#4292C6", "#2171B5", "#08519C")
 
 
-treat.order  <- c("control_amf",  "chicken", "cow","compost", "pellet")
+treat.order  <- c("control",  "chicken", "cow","compost", "pellet")
 treat.labels <- c("Control",  "Chicken\nmanure", "Cow\nmanure","Compost", "Pelletised\ncompost")
 
 treat.colors_ok <- c("Control"  = "darkseagreen" , "Chicken\nmanure"= "royalblue1", "Cow\nmanure" = "red3","Pelletised\ncompost"= "darkorchid1","Compost"="chocolate4")
@@ -37,10 +39,13 @@ treat.colors_ok <- c("Control"  = "darkseagreen" , "Chicken\nmanure"= "royalblue
 ## Load data
 
 ```{r}
-zotu97 <- import_qiime("01_Raw_data/p1031_run231218_Revio_16S_ZOTU_c97_Count_Sintax.txt")
+zotu97 <- import_qiime(
+  "../01_Raw_data/p1031_run231023_ITS_ccs_ZOTU_c97_Count_Sintax.txt"
+)
 
-metadata <- read.csv("01_Raw_data/metadata_2025.csv" ) %>% 
-  column_to_rownames(var= "sample_name")
+metadata <- read.csv(
+  "../01_Raw_data/metadata_2025.csv") %>%
+  column_to_rownames(var = "sample_name")
 
 zotu97 <- merge_phyloseq(zotu97, sample_data(metadata))
 ```
@@ -48,17 +53,17 @@ zotu97 <- merge_phyloseq(zotu97, sample_data(metadata))
 ## Initial exploration of the data
 
 ```{r}
-n1 <- sum(otu_table(zotu97)) # Number of reads 4956366
+n1 <- sum(otu_table(zotu97)) # Number of reads 1561802
 
-n_taxa <- ntaxa(zotu97) #11836
+n_taxa <- ntaxa(zotu97) #1641
 
 
 ## remove singletons
 zotu97 <- prune_taxa(rowSums(otu_table(zotu97)) > 1, zotu97)
 
-n2 <- sum(otu_table(zotu97)) #4956344
+n2 <- sum(otu_table(zotu97)) #1561772
 
-n1-n2 # 22 singletons removed
+n1-n2 # 30 singletons removed
 
 missing_samples <- setdiff(rownames(metadata), sample_names(zotu97))
 missing_samples #0
@@ -67,11 +72,11 @@ missing_samples #0
 #numeric 
 number_sequences_perSample <- sample_sums(zotu97)
 
-mean(number_sequences_perSample) #55070.49
-median(number_sequences_perSample) #54351
-min(number_sequences_perSample) #1550
-max(number_sequences_perSample) #99336
-sd(number_sequences_perSample) #24269.93
+mean(number_sequences_perSample) #17353.02
+median(number_sequences_perSample) #14172
+min(number_sequences_perSample) #5314
+max(number_sequences_perSample) #54616
+sd(number_sequences_perSample) #9951.012
 ```
 
 
@@ -84,9 +89,6 @@ seqdepth97 <- colSums(otu_table(zotu97)) #get the number of sequences(or reads) 
 sample.table97 <- sample_data(zotu97)
 
 sample.table97 <- cbind(seq.depth= seqdepth97, sample.table97) #binds the number of sequences per sample to the sample data that also contains the metadata. This allows to filter all the data according to experiment, repetition, treatment...
-names(sample.table97)
-
-
 
 table_resume_depth <-sample.table97 %>%
   group_by(treatment) %>%
@@ -105,16 +107,15 @@ df_depth <- sample.table97 %>%
   mutate(
     rep       = factor(rep, levels = c("A", "B", "C")),
     time      = factor(time),
-    treatment = as.factor(treatment)  # usamos directamente lo que haya
+    treatment = as.factor(treatment)
   )
-
 
 
 p_depth <- ggplot(df_depth, aes(x = rep, y = seq.depth, fill = treatment)) +
   geom_col(width = 0.85, color = "grey80", linewidth = 0.2)+
   facet_grid(time ~ treatment, scales = "free_x", space = "free_x", switch = "y", labeller = labeller(
       treatment = c(
-        "control_amf" = "Control",
+        "control" = "Control",
         "chicken"     = "Chicken\nmanure",
         "cow"         = "Cow\nmanure",
         "compost"     = "Compost",
@@ -124,7 +125,7 @@ p_depth <- ggplot(df_depth, aes(x = rep, y = seq.depth, fill = treatment)) +
     labels = treat.labels)+
   labs(
     x = NULL,
-    y = "16S Sequencing depth (reads)",
+    y = "ITS Sequencing depth (reads)",
     fill = "Treatment"
   ) +
   theme_classic(base_size = 12) +
@@ -138,13 +139,13 @@ p_depth <- ggplot(df_depth, aes(x = rep, y = seq.depth, fill = treatment)) +
                                     linewidth = 0.3))
 
 
-
 p_depth
-ggsave(p_depth, file= "04_Figures/SupplementaryFigure1_16S.png", width= 1900,height= 1200, units= "px")
+
+ggsave(p_depth, file= "04_Figures/SupplementaryFigure1_ITS.png", width= 1900,height= 1200, units= "px")
 
 rm(p_depth)
 
-saveRDS(p_depth, file = '03_Analysis_files/Supplementary_plot/Supplementary1_16S.rds')
+saveRDS(p_depth, file = '03_Analysis_files/Supplementary_plot/Supplementary1_ITS.rds')
 ```
 
 
@@ -170,102 +171,72 @@ rarefaction_treatment <- rarecurve_meta %>% ggplot(aes(Reads, Species, col= trea
   scale_color_manual(values = treat.colors, labels= treat.labels, breaks = treat.order)+
   theme_classic()+
   labs(x= "Sequencing depth",
-       y= "Number of OTUs",
+       y= "ITS Number of OTUs",
        col= "Treatment")
 
-ggsave(rarefaction_treatment, file= "04_Figures/SupplementaryFigure2_16S.png", width= 1900,height= 1200, units= "px")
+ggsave(rarefaction_treatment, file= "04_Figures/SupplementaryFigure2_ITS.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(rarefaction_treatment, file = '03_Analysis_files/Supplementary_plot/Supplementary2_16S.rds')
+saveRDS(rarefaction_treatment, file = '03_Analysis_files/Supplementary_plot/Supplementary2_ITS.rds')
 ```
 
 ## Taxonomy
 
 ```{r}
-
-
 ## 1) Normalise to relative abundance
-physeq_norm <- transform_sample_counts(zotu97, function(x) x / sum(x))
-phyla_total <- tax_table(zotu97)[, "Phylum"]   
-n_phyla <- length(unique(phyla_total[!is.na(phyla_total)]))
-
-n_phyla
-
-
+physeq_norm<-  transform_sample_counts(zotu97, function(x) x / sum(x) )
 ## 2) Collapse to Phylum
-dat_merge <- tax_glom(physeq = physeq_norm,
-                      taxrank = "Phylum",
-                      NArm   = FALSE)
+dat_merge   <- tax_glom(physeq = physeq_norm, "Phylum", NArm = FALSE)
 
-molten <- psmelt(dat_merge)
+molten      <- psmelt(dat_merge)
 
 ## 3) Cluster per mean and collapse to less than 2%
 agg <- molten %>%
   group_by(treatment, Phylum) %>%
-  summarise(Abundance = mean(Abundance, na.rm = TRUE), .groups = "drop") %>% 
+  summarise(Abundance = mean(Abundance, na.rm = TRUE), .groups = "drop") %>%
   mutate(
-    Taxonomy = case_when(
-      is.na(Phylum)            ~ "Unassigned",      # 👈 todos los NA van aquí
-      Abundance < 0.02         ~ "Less than 2%",    # 👈 solo el resto <2%
-      TRUE                     ~ as.character(Phylum)
-    ),
+    Taxonomy  = if_else(Abundance >= 0.02, Phylum, "Less than 2%"),
     treatment = factor(treatment, levels = treat.order, labels = treat.labels)
-  ) %>%
-  mutate(
-    Taxonomy = factor(
-      Taxonomy,
-      levels = c(setdiff(unique(Taxonomy), "Less than 2%"),
-                 "Less than 2%")
-    )
   )
-
 ## 4) NAs to Unassigned
 agg$Taxonomy[agg$Taxonomy %in% c("NA", NA)] <- "Unassigned"
 
-agg <- agg %>%
-  mutate(
-    Taxonomy = factor(
-      Taxonomy,
-      levels = c(setdiff(unique(Taxonomy), "Unassigned"),
-                 "Unassigned")
-    )
-  )
-
-## 5) Regroup
 agg2 <- agg %>%
   group_by(treatment, Taxonomy) %>%
   summarise(Abundance = sum(Abundance), .groups = "drop") %>%
   group_by(treatment) %>%
   mutate(Abundance = Abundance / sum(Abundance)) %>%
   ungroup()
+agg %>% 
+  filter(str_detect(Phylum, "Glomeromycota"))
 
-plotColorBarplot_16S <- c(
-  "Cyanobacteria"      = "#8DD3C7",
-  "Actinobacteriota"   = "#B2D8EE",
-  "Bacteroidota"       = "#BEBADA",
-  "Acidobacteriota"    = "#FB8072",
-  "Firmicutes"         = "#80B1D3",
-  "Gemmatimonadota"    = "#FDB462",
-  "Planctomycetota"    = "#B3DE69",
-  "Proteobacteria"     = "#FCCDE5",
-  "Myxococcota"  = "#256D3D",
-  "Chloroflexi"  = "#A34022",
-  "Verrucomicrobiota"  = "#7C4D79",
-  "Less than 2%"       = "#F9E77F",
-  "Unassigned"         = "gray30"
-)
+## 5) Regroup
+agg_check <- agg2 %>%
+  group_by(treatment) %>%
+  summarise(total = sum(Abundance), .groups = "drop")
 
-setdiff(unique(agg2$Taxonomy), names(plotColorBarplot_16S))
+agg_check
 
-p_phyla_bac <- ggplot(agg2, aes(x = 1, y = Abundance, fill = Taxonomy)) +
-  geom_col(width = 0.6, color = NA) +
-  facet_grid(. ~ treatment, scales = "free_x", space = "free_x") +
-  scale_y_continuous(
-    limits = c(0, 1),
-    labels = percent_format(accuracy = 1)
+
+phylum.pal <- c(
+  "Ascomycota"        = "#A8D1BC",  
+  "Basidiomycota"     = "#F7C4B4",
+  "Glomeromycota" = "#B0E0F4", 
+  "Mortierellomycota" = "#D7C9E8",  
+  "Less than 2%"      = "#F9E77F",   
+  "Unassigned" = "darkgrey")
+
+
+p_phyla2 <- ggplot(agg2, aes(x = 1, y = Abundance, fill = Taxonomy)) +
+  geom_col(width = 0.6, color = "grey44", linewidth = 0.05) +
+facet_grid(. ~ treatment, scales = "free_x", space = "free_x") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  scale_fill_manual(
+    values = phylum.pal,
+    breaks = c("Ascomycota", "Basidiomycota", "Glomeromycota",
+               "Mortierellomycota", "Less than 2%", "Unassigned")
   ) +
-  scale_fill_manual(values = plotColorBarplot_16S) +
-  labs(y = "Relative abundance (%) Bacteria", x = NULL) +
+  labs(y = "ITS Relative abundance (%)", x = NULL) +
   theme_classic(base_size = 12) +
   theme(
     legend.position   = "bottom",
@@ -274,17 +245,13 @@ p_phyla_bac <- ggplot(agg2, aes(x = 1, y = Abundance, fill = Taxonomy)) +
     strip.placement   = "outside",
     strip.text.x.top  = element_text(angle = 0, vjust = 0.5),
     panel.spacing.x   = unit(0.1, "lines"), 
-    legend.title = element_text(size = 8),   # legend size
-  legend.text  = element_text(size = 7),
-    strip.background = element_rect(fill = NA,
-                                    linewidth = 0.3)) +
-  guides(fill = guide_legend("Taxonomy", nrow = 2, byrow = TRUE))
+    strip.background = element_rect(fill = NA, linewidth = 0.3)) +
+  guides(fill = guide_legend("Taxonomy", nrow = 1, byrow = TRUE))
+p_phyla2
 
-p_phyla_bac
-
-ggsave(p_phyla_bac, file= "04_Figures/SupplementaryFigure3_16S.png", width= 1900,height= 1200, units= "px")
+ggsave(p_phyla2, file= "04_Figures/SupplementaryFigure3_ITS.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(p_phyla_bac, file = '03_Analysis_files/Supplementary_plot/Supplementary3_16S.rds')
+saveRDS(p_phyla2, file = '03_Analysis_files/Supplementary_plot/Supplementary3_ITS.rds')
 ```
 

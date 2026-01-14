@@ -205,8 +205,8 @@ agg <- molten %>%
   summarise(Abundance = mean(Abundance, na.rm = TRUE), .groups = "drop") %>% 
   mutate(
     Taxonomy = case_when(
-      is.na(Phylum)            ~ "Unassigned",      # 👈 todos los NA van aquí
-      Abundance < 0.02         ~ "Less than 2%",    # 👈 solo el resto <2%
+      is.na(Phylum)            ~ "Unassigned",      
+      Abundance < 0.02         ~ "Less than 2%",    
       TRUE                     ~ as.character(Phylum)
     ),
     treatment = factor(treatment, levels = treat.order, labels = treat.labels)
