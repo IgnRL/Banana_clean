@@ -40,11 +40,11 @@ treat.colors_ok <- c("Control"  = "darkseagreen" , "Chicken\nmanure"= "royalblue
 
 ```{r}
 zotu97 <- import_qiime(
-  "../01_Raw_data/p1031_run231023_ITS_ccs_ZOTU_c97_Count_Sintax.txt"
+  "01_Raw_data/p1031_run231023_ITS_ccs_ZOTU_c97_Count_Sintax.txt"
 )
 
 metadata <- read.csv(
-  "../01_Raw_data/metadata_2025.csv") %>%
+  "01_Raw_data/metadata_2025.csv") %>%
   column_to_rownames(var = "sample_name")
 
 zotu97 <- merge_phyloseq(zotu97, sample_data(metadata))
@@ -88,7 +88,7 @@ sd(number_sequences_perSample) #9951.012
 seqdepth97 <- colSums(otu_table(zotu97)) #get the number of sequences(or reads) per sample
 sample.table97 <- sample_data(zotu97)
 
-sample.table97 <- cbind(seq.depth= seqdepth97, sample.table97) #binds the number of sequences per sample to the sample data that also contains the metadata. This allows to filter all the data according to experiment, repetition, treatment...
+sample.table97 <- cbind(seq.depth= seqdepth97, sample.table97) 
 
 table_resume_depth <-sample.table97 %>%
   group_by(treatment) %>%
@@ -242,10 +242,14 @@ facet_grid(. ~ treatment, scales = "free_x", space = "free_x") +
     legend.position   = "bottom",
     axis.text.x       = element_blank(),
     axis.ticks.x      = element_blank(),
+    axis.line   = element_line(linewidth = 0.2),
     strip.placement   = "outside",
+    strip.background = element_rect(
+    fill = NA,
+    colour = "black",
+    linewidth = 0.3),
     strip.text.x.top  = element_text(angle = 0, vjust = 0.5),
-    panel.spacing.x   = unit(0.1, "lines"), 
-    strip.background = element_rect(fill = NA, linewidth = 0.3)) +
+    panel.spacing.x   = unit(0.1, "lines")) +
   guides(fill = guide_legend("Taxonomy", nrow = 1, byrow = TRUE))
 p_phyla2
 

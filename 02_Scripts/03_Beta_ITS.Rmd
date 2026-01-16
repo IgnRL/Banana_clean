@@ -1,0 +1,314 @@
+---
+title: "03_Beta_16S"
+author: "Ignacio Romero"
+date: "2026-01-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(phyloseq)
+library(tidyverse)
+library(vegan)
+library(rstatix)
+library(ggpubr)
+library(multcomp)
+
+```
+
+
+
+## Plot colors
+```{r colors and order, include=FALSE}
+treat.colors <- c("control"  = "darkseagreen" , "chicken"= "royalblue1", "cow" = "red3","pellet"= "darkorchid1","compost"="chocolate4")
+
+time.colors <- c("#BFD3E6", "#9ECAE1", "#6BAED6", "#4292C6", "#2171B5", "#08519C")
+
+
+treat.order  <- c("control",  "chicken", "cow","compost", "pellet")
+treat.labels <- c("Control",  "Chicken\nmanure", "Cow\nmanure","Compost", "Pelletised\ncompost")
+
+treat.colors_ok <- c("Control"  = "darkseagreen" , "Chicken\nmanure"= "royalblue1", "Cow\nmanure" = "red3","Pelletised\ncompost"= "darkorchid1","Compost"="chocolate4")
+```
+
+## Load data
+
+```{r}
+zotu97 <- import_qiime("01_Raw_data/p1031_run231023_ITS_ccs_ZOTU_c97_Count_Sintax.txt")
+
+metadata <- read.csv("01_Raw_data/metadata_2025.csv" ) %>% 
+  column_to_rownames(var= "sample_name")
+metadata$treat.pot <- paste(metadata$treatment, metadata$rep, sep= "_")
+
+zotu97 <- merge_phyloseq(zotu97, sample_data(metadata))
+
+
+
+##modifiyin the table to change rowxcol
+otu_mat <- otu_table(`zotu97`)
+if (taxa_are_rows(`zotu97`)) {
+  otu_mat <- t(otu_mat)          
+}
+#filtering
+otu_mat <- as.matrix(otu_mat)
+min_reads <- 3       
+min_samples <- 3     
+prevalence <- colSums(otu_mat >= min_reads)
+keep_otus <- prevalence >= min_samples
+
+otu_filt <- otu_mat[, keep_otus, drop = FALSE]
+cat("ZOTUs kept:", ncol(otu_filt), "out of", ncol(otu_mat), "\n")
+#ZOTUs kept: 739 out of 1641 
+
+zotu_filt <- phyloseq(
+  otu_table(otu_filt, taxa_are_rows = FALSE),
+  sample_data(sample_data(zotu97)),      # 
+  tax_table(tax_table(zotu97)[keep_otus, ])
+)
+zotu_filt
+```
+
+## CLR transform and data preparation
+
+```{r}
+# PCA exploring
+##phyloseq filter (zotu_filt)
+otu_filt
+# Normalization clr
+otu_clr <- decostand(otu_filt, method = "clr", pseudocount = 1)  
+
+pca_clr <- prcomp(otu_clr, scale. = TRUE, center=TRUE) 
+var_perc_clr <- (pca_clr$sdev^2 / sum(pca_clr$sdev^2)) * 100
+scores_clr <- pca_clr$x
+
+
+meta <- as(sample_data(zotu_filt), "data.frame")
+## scores 
+scores_clr <- as.data.frame(pca_clr$x)
+scores_clr$sample_id <- rownames(scores_clr)
+
+meta$treatment <- factor(meta$treatment)
+meta$time      <- factor(meta$time)
+meta$treat.pot <- factor(meta$treat.pot)
+
+```
+
+## Euclidean distances
+
+```{r}
+eu_distances_all <- vegdist(otu_clr, method = "euclidean")
+
+##permutations
+set.seed(123)
+meta <- meta[attr(eu_distances_all, "Labels"), , drop = FALSE]
+#meta to data frame
+head(meta)
+
+eu_permanova_all <- adonis2(
+  eu_distances_all ~ treatment * time,
+  data     = meta,
+  strata   = meta$treat.pot,
+  by       = "terms",
+  permutations = 999
+)
+
+meta$sample_id <- rownames(meta)
+plot_df_clr <- left_join(scores_clr, meta, by = "sample_id")
+
+
+plot_df_clr <- plot_df_clr %>%
+  mutate(treatment = factor(treatment, levels = treat.order))
+rowSums(otu_clr)
+
+
+perm_all <- paste("PERMANOVA",
+  paste0("Treat: R²=", round(eu_permanova_all["treatment","R2"],2),
+         ", F=", round(eu_permanova_all["treatment","F"],2),
+         ", p=", signif(eu_permanova_all["treatment","Pr(>F)"],2)),
+  paste0("Time: R²=", round(eu_permanova_all["time","R2"],2),
+         ", F=", round(eu_permanova_all["time","F"],2),
+         ", p=", signif(eu_permanova_all["time","Pr(>F)"],2)),
+  paste0("Treat×Time: R²=", round(eu_permanova_all["treatment:time","R2"],2),
+         ", F=", round(eu_permanova_all["treatment:time","F"],2),
+         ", p=", signif(eu_permanova_all["treatment:time","Pr(>F)"],2)),
+  sep="\n"
+)
+
+p_pca_clr <- ggplot(plot_df_clr, aes(PC1, PC2, color = treatment, shape = time)) +
+  geom_point(size = 3, alpha = 0.9) +
+  geom_hline(yintercept = 0, linetype = "dashed", linewidth = 0.3, alpha = 0.6) +
+  geom_vline(xintercept = 0, linetype = "dashed", linewidth = 0.3, alpha = 0.6) +
+  scale_color_manual(values = treat.colors, breaks = treat.order, labels = treat.labels) +
+  labs(
+    x = sprintf("PC1 (%.1f%%)", var_perc_clr[1]),
+    y = sprintf("PC2 (%.1f%%)", var_perc_clr[2]),
+    title = "PCA", color = "Treatment",
+    shape = "Time"
+  ) +
+  theme_classic()+
+  theme(text = element_text(size = 12))+
+    geom_text(
+  aes(x = Inf, y = Inf, label = perm_all),
+  hjust = 1.1, vjust = 1.1,
+  size = 3,
+  color = "black"
+)
+
+p_pca_clr
+
+ggsave(p_pca_clr, file= "04_Figures/Supplemetary_FigureS5_ITS.png", width= 1900,height= 1200, units= "px")
+
+
+saveRDS(p_pca_clr, file = '03_Analysis_files/Supplementary_plot/Supplemetary_FigureS5_ITS.rds')
+
+```
+
+## RDA with soil properties
+
+```{r}
+#load data
+soil_data<- readxl::read_excel("01_Raw_data/metadata_2025_soil.xlsx")
+#normalizada con clr
+otu_clr 
+
+#no selectec cfu, ni respiration
+env_data <- soil_data %>%
+  dplyr::select(org.matter, phosphorus, MOT,
+         calcium, magnesium, sodium, potassium, ph.water,
+         pH.chloride, conductivity, nitrogen)
+
+rda_full <- rda(otu_clr ~ ., data = env_data)
+summary(rda_full)
+vif.cca(rda_full) 
+
+env_data_reduced <- env_data %>%
+  dplyr::select(-pH.chloride)
+
+rda_reduced <- rda(otu_clr ~ ., data = env_data_reduced)
+summary(rda_reduced)
+vif.cca(rda_reduced)
+#to fix the r2
+rda_null <- rda(otu_clr ~ 1, data = env_data_reduced) 
+set.seed(123)
+
+rda_step <- ordiR2step(rda_null,
+                       scope = formula(rda_reduced),
+                       direction = "forward", 
+                       R2scope = TRUE,
+                       pstep = 999) 
+
+
+step_df <- as.data.frame(rda_step$anova)
+step_df
+rownames(step_df)
+
+summary(rda_step)
+```
+
+## Stats RDA 
+
+```{r}
+#stadstics
+global_test<-anova(rda_step, permutations = 99) # global test
+axis_test<-anova(rda_step, by = "axis", permutations = 99) # axis RDA
+variable_test<-anova(rda_step, by = "terms", permutations = 99)
+RsquareAdj(rda_step)
+
+
+F_value <- round(global_test$F[1], 2)
+p_value <- global_test$`Pr(>F)`[1]
+
+p_label <- ifelse(p_value < 0.001, "< 0.001", round(p_value, 3))
+subtitle_text <- paste0(
+  "Global test: F = ", F_value, ", p ", p_label,
+  " | Adj. R² = ", round(RsquareAdj(rda_step)$adj.r.squared, 3)
+)
+
+treat <- soil_data$treatment
+time  <- soil_data$time
+identical(soil_data$sample_id, rownames(otu_clr))
+
+scal <- 2
+sc <- scores(rda_step, display = c("sites","bp"), scaling = scal)
+sites <- as.data.frame(sc$sites)
+sites$sample_id <- rownames(sites)
+sites$treatment <- soil_data$treatment
+sites$time <- soil_data$time
+
+arrows <- as.data.frame(sc$biplot)
+arrows$var <- rownames(arrows)
+
+#Constrained variance
+imp <- summary(rda_step, scaling = scal)$cont$importance
+
+rda1_perc <- round(100 * rda_step$CCA$eig[1] / rda_step$CCA$tot.chi, 1)
+rda2_perc <- round(100 * rda_step$CCA$eig[2] / rda_step$CCA$tot.chi, 1)
+
+arrow_mul <- ordiArrowMul(rda_step, display = "bp", scaling = scal)
+booster <- 5
+arrows2 <- arrows
+arrows2$RDA1 <- arrows$RDA1 * arrow_mul*booster
+arrows2$RDA2 <- arrows$RDA2 * arrow_mul*booster
+
+
+arrows2$len <- sqrt(arrows2$RDA1^2 + arrows2$RDA2^2)
+offset <- 1
+arrows2$hoffset <- ifelse(arrows2$len > 0, arrows2$RDA1 / arrows2$len * offset, 0)
+arrows2$RDA1_label <-  arrows2$RDA1+ c(0.2, -0.3, 0.4,-0.4, 0.2, -0.4, 0.2,-0.1,0,0)
+arrows2$voffset <- ifelse(arrows2$len > 0, arrows2$RDA2 / arrows2$len * offset, 1)
+
+
+
+label_boost <- 2.5  
+
+
+rda_alldata <- ggplot(sites, aes(x = RDA1, y = RDA2,
+                        color = factor(treatment),
+                        shape = factor(time))) +
+  geom_hline(yintercept = 0, linewidth = 0.3, linetype = "dashed") +
+  geom_vline(xintercept = 0, linewidth = 0.3, linetype = "dashed") +
+  geom_point(size = 3, alpha = 0.9) +
+  scale_color_manual(values = treat.colors,
+                     breaks = treat.order,
+                     labels = treat.labels,
+                     name   = "Treatment") +
+    # flechas de variables
+  geom_segment(data = arrows2,
+               aes(x = 0, y = 0, xend = RDA1, yend = RDA2),
+               inherit.aes = FALSE, linewidth = 0.6, arrow = arrow(length = unit(0.25,"cm"))) +
+  geom_text(
+  data = arrows2,
+  aes(x = RDA1_label ,
+      y = RDA2 ,
+      label = var),
+  inherit.aes = FALSE,
+  size = 4,
+  color = "gray10") +
+  labs(x = paste0("RDA1 (", rda1_perc, "%)"),
+       y = paste0("RDA2 (", rda2_perc, "%)"),
+       color = "Treatment", shape = "Time",
+       title = "RDA-Soil properties") +
+  theme_classic(base_size = 13) +
+  theme(panel.grid.minor = element_blank(),
+        legend.position = "right")+
+  annotate(
+    "text",
+    x = Inf, y = Inf,
+    label = subtitle_text,
+    hjust = 1.1, vjust = 1.3,
+    size = 4, 
+  )
+
+
+rda_alldata
+ggsave(rda_alldata, file= "04_Figures/Fig2_ITS.png", width= 1900,height= 1200, units= "px")
+
+
+saveRDS(rda_alldata, file = '03_Analysis_files/Fig2_ITS.png')
+
+
+```
+

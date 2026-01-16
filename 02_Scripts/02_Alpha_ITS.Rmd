@@ -1,0 +1,272 @@
+---
+title: "02_Alpha"
+author: "Ignacio Romero"
+date: "2026-01-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(phyloseq)
+library(tidyverse)
+library(vegan)
+library(rstatix)
+library(ggpubr)
+library(car)
+library(emmeans)
+library(lmerTest)
+library(lme4)
+
+```
+
+
+## Plot colors
+```{r colors and order, include=FALSE}
+treat.colors <- c("control"  = "darkseagreen" , "chicken"= "royalblue1", "cow" = "red3","pellet"= "darkorchid1","compost"="chocolate4")
+
+time.colors <- c("#BFD3E6", "#9ECAE1", "#6BAED6", "#4292C6", "#2171B5", "#08519C")
+
+
+treat.order  <- c("control",  "chicken", "cow","compost", "pellet")
+treat.labels <- c("Control",  "Chicken\nmanure", "Cow\nmanure","Compost", "Pelletised\ncompost")
+
+treat.colors_ok <- c("Control"  = "darkseagreen" , "Chicken\nmanure"= "royalblue1", "Cow\nmanure" = "red3","Pelletised\ncompost"= "darkorchid1","Compost"="chocolate4")
+```
+
+## Load data
+
+```{r}
+zotu97 <- import_qiime("01_Raw_data/p1031_run231023_ITS_ccs_ZOTU_c97_Count_Sintax.txt")
+
+metadata <- read.csv("01_Raw_data/metadata_2025.csv" ) %>% 
+  column_to_rownames(var= "sample_name")
+metadata$treat.pot <- paste(metadata$treatment, metadata$rep, sep= "_")
+
+zotu97 <- merge_phyloseq(zotu97, sample_data(metadata))
+
+
+```
+
+
+## Alpha indexes
+
+```{r}
+richness <- specnumber(otu_table(zotu97), MARGIN=2)
+
+shannon <- diversity(otu_table(zotu97), MARGIN= 2)
+
+evenness <- shannon/richness
+
+div.index <- data.frame(cbind(richness, shannon, evenness))
+
+sample_table<- cbind(sample_data(zotu97), div.index)
+
+zotu97 <- merge_phyloseq(zotu97, sample_data(sample_table))
+
+sample_data(zotu97)
+```
+
+### Check indexes normality
+
+
+```{r shanon}
+sample_table %>% 
+  shapiro_test(shannon)
+
+ggqqplot(data=sample_table, "shannon", facet.by= "time")
+
+# The outliers are accounted for due to their low sequencing depth as seen in 01_introduction
+
+
+sample_table %>% 
+  group_by(treatment) %>%
+  shapiro_test(shannon)
+
+ggqqplot(data=sample_table, "shannon", facet.by= "treatment")
+# Same as above
+```
+
+```{r evenness}
+sample_table %>% 
+  shapiro_test(evenness)
+
+ggqqplot(data=sample_table, "evenness", facet.by= "time")
+
+# The outliers are accounted for due to their low sequencing depth as seen in 01_introduction
+
+
+sample_table %>% 
+  group_by(treatment) %>%
+  shapiro_test(evenness)
+
+ggqqplot(data=sample_table, "evenness", facet.by= "treatment")
+# Same as above
+```
+
+```{r richness}
+sample_table %>% 
+  shapiro_test(richness)
+
+ggqqplot(data=sample_table, "richness", facet.by= "time")
+
+# The outliers are accounted for due to their low sequencing depth as seen in 01_introduction
+
+
+sample_table %>% 
+  group_by(treatment) %>%
+  shapiro_test(richness)
+
+ggqqplot(data=sample_table, "richness", facet.by= "treatment")
+# Same as above
+```
+
+## Alpha diversity stats
+
+```{r}
+sample_table <- sample_table %>%
+  mutate(
+    treatment = factor(treatment, levels = treat.order))
+sample_table
+```
+
+```{r shannon}
+lmer.shannon <- lmer(shannon ~ time*treatment+(1|treat.pot) , data = sample_table)
+summary(lmer.shannon)
+
+#Repeated measures anova
+anova.shannon <- anova(lmer.shannon) %>% as.data.frame()
+emm_time_by_trt <- emmeans(lmer.shannon, ~ time | treatment) %>%
+  as.data.frame()
+
+shannon_treat_facet <- sample_table %>% ggplot(aes(x= time, y= shannon, color= treatment, group = treat.pot)) +
+  geom_point(shape= 4) +
+  geom_line(alpha = 0.3) +
+ geom_point(data = emm_time_by_trt,
+             aes(x = time, y = emmean, color = treatment, group = treatment),
+             inherit.aes = FALSE,
+             size = 1.8) +
+  geom_line(data = emm_time_by_trt,
+          aes(time, emmean, color = treatment, group = treatment),
+          inherit.aes = FALSE, linewidth = 1) +
+  scale_color_manual(values= treat.colors)+
+  facet_wrap(~factor(treatment, levels = treat.order, labels = treat.labels),
+             nrow = 1) +
+  xlab(NULL)+ylab("Shannon index")+
+  theme_light() +
+  guides(color = "none")+
+  theme_classic()+
+  theme(
+    legend.position   = "bottom",
+    strip.placement   = "outside",
+    strip.text.x.top  = element_text(angle = 0, vjust = 0.5),
+    panel.spacing.x   = unit(0.1, "lines"), 
+    legend.title = element_text(size = 8),   # legend size
+  legend.text  = element_text(size = 7),
+    strip.background = element_rect(fill = NA,
+                                    linewidth = 0.3)) +
+  guides(fill = guide_legend("Taxonomy", nrow = 2, byrow = TRUE))
+  
+shannon_treat_facet
+
+ggsave(shannon_treat_facet, file= "04_Figures/Supplemetary_FigureS4AITS.png", width= 1900,height= 1200, units= "px")
+
+
+saveRDS(shannon_treat_facet, file = '03_Analysis_files/Supplementary_plot/Supplementary_FigureS4AITS.rds')
+
+```
+
+```{r evenness}
+lmer.evenness <- lmer(evenness ~ time*treatment+(1|treat.pot) , data = sample_table)
+summary(lmer.evenness)
+
+#Repeated measures anova
+anova.evenness <- anova(lmer.evenness) %>% as.data.frame()
+emm_time_by_trt <- emmeans(lmer.evenness, ~ time | treatment) %>%
+  as.data.frame()
+
+evenness_treat_facet <- sample_table %>% ggplot(aes(x= time, y= evenness, color= treatment, group = treat.pot)) +
+  geom_point(shape= 4) +
+  geom_line(alpha = 0.3) +
+ geom_point(data = emm_time_by_trt,
+             aes(x = time, y = emmean, color = treatment, group = treatment),
+             inherit.aes = FALSE,
+             size = 1.8) +
+  geom_line(data = emm_time_by_trt,
+          aes(time, emmean, color = treatment, group = treatment),
+          inherit.aes = FALSE, linewidth = 1) +
+  scale_color_manual(values= treat.colors)+
+  facet_wrap(~factor(treatment, levels = treat.order, labels = treat.labels),
+             nrow = 1) +
+  xlab(NULL)+ylab("Evenness index")+
+  theme_light() +
+  guides(color = "none")+
+  theme_classic()+
+  theme(
+    legend.position   = "bottom",
+    strip.placement   = "outside",
+    strip.text.x.top  = element_text(angle = 0, vjust = 0.5),
+    panel.spacing.x   = unit(0.1, "lines"), 
+    legend.title = element_text(size = 8),   # legend size
+  legend.text  = element_text(size = 7),
+    strip.background = element_rect(fill = NA,
+                                    linewidth = 0.3)) +
+  guides(fill = guide_legend("Taxonomy", nrow = 2, byrow = TRUE))
+  
+evenness_treat_facet
+
+ggsave(evenness_treat_facet, file= "04_Figures/Supplemetary_FigureS4BITS.png", width= 1900,height= 1200, units= "px")
+
+
+saveRDS(evenness_treat_facet, file = '03_Analysis_files/Supplementary_plot/Supplemetary_FigureS4BITS.png')
+
+```
+
+
+```{r richness}
+lmer.richness <- lmer(richness ~ time*treatment+(1|treat.pot) , data = sample_table)
+summary(lmer.richness)
+
+#Repeated measures anova
+anova.richness <- anova(lmer.richness) %>% as.data.frame()
+emm_time_by_trt <- emmeans(lmer.richness, ~ time | treatment) %>%
+  as.data.frame()
+
+richness_treat_facet <- sample_table %>% ggplot(aes(x= time, y= richness, color= treatment, group = treat.pot)) +
+  geom_point(shape= 4) +
+  geom_line(alpha = 0.3) +
+ geom_point(data = emm_time_by_trt,
+             aes(x = time, y = emmean, color = treatment, group = treatment),
+             inherit.aes = FALSE,
+             size = 1.8) +
+  geom_line(data = emm_time_by_trt,
+          aes(time, emmean, color = treatment, group = treatment),
+          inherit.aes = FALSE, linewidth = 1) +
+  scale_color_manual(values= treat.colors)+
+  facet_wrap(~factor(treatment, levels = treat.order, labels = treat.labels),
+             nrow = 1) +
+  xlab(NULL)+ylab("Richness index")+
+  theme_light() +
+  guides(color = "none")+
+  theme_classic()+
+  theme(
+    legend.position   = "bottom",
+    strip.placement   = "outside",
+    strip.text.x.top  = element_text(angle = 0, vjust = 0.5),
+    panel.spacing.x   = unit(0.1, "lines"), 
+    legend.title = element_text(size = 8),   # legend size
+  legend.text  = element_text(size = 7),
+    strip.background = element_rect(fill = NA,
+                                    linewidth = 0.3)) +
+  guides(fill = guide_legend("Taxonomy", nrow = 2, byrow = TRUE))
+  
+richness_treat_facet
+
+ggsave(richness_treat_facet, file= "04_Figures/Fig1_ITS.png", width= 1900,height= 1200, units= "px")
+
+
+saveRDS(richness_treat_facet, file = '03_Analysis_files/Fig1_ITS.rds')
+
+```
