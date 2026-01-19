@@ -306,7 +306,7 @@ rda_alldata
 ggsave(rda_alldata, file= "04_Figures/Fig2_ITS.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(rda_alldata, file = '03_Analysis_files/Fig2_ITS.png')
+saveRDS(rda_alldata, file = '03_Analysis_files/Fig2_ITS.rds')
 
 
 ```
@@ -430,7 +430,7 @@ rda_alldata_plant
 ggsave(rda_alldata_plant, file= "04_Figures/Supplemetary_FigureS6_ITS.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(rda_alldata_plant, file = '03_Analysis_files//Supplementary_plot/Supplemetary_FigureS6_ITS.png')
+saveRDS(rda_alldata_plant, file = '03_Analysis_files//Supplementary_plot/Supplemetary_FigureS6_ITS.rds')
 
 
 ```
