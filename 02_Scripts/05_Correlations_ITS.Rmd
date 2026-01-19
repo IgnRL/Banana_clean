@@ -146,7 +146,7 @@ fungi_plot <- ggplot(cfu_fungi_join,
   ) +
   labs(
     x = expression(log[10]~"CFU g"^{-1}~"soil (cultivable filamentous fungi)"),
-    y = "Relative abundance (%) (TSS)\n of putative cultivable filamentous fungi (Ascomycota)"
+    y = "Relative abundance (%) of putative \ncultivable filamentous fungi (Ascomycota)"
   ) +
   theme_classic(base_size = 12) +
   annotate("text",
@@ -168,7 +168,7 @@ saveRDS(fungi_plot, file = '03_Analysis_files/Figure_4B_Fungi.rds')
 
 ```{r trichoderma ra}
 tax_dada2 <- readRDS("01_Raw_Data/dada2_trial/taxonomy_ITS_dada2.RDa")
-zotu97 <- import_qiime("ITS_banana/p1031_run231023_ITS_ccs_ZOTU_c97_Count_Sintax.txt")
+zotu97 <- import_qiime("01_Raw_Data/p1031_run231023_ITS_ccs_ZOTU_c97_Count_Sintax.txt")
 
 
 zotu97 <- merge_phyloseq(zotu97, sample_data(metadata))
@@ -329,7 +329,7 @@ trichoderma_plot <- ggplot(cfu_trichoderma_join,
   ) +
  labs(
   x = expression(log[10]~"CFU g"^{-1}~"soil ("*italic("Trichoderma")*")"),
-  y = expression("Relative abundance (% ITS, TSS) of "*italic("Trichoderma"))
+  y = expression("Relative abundance (%) of "*italic("Trichoderma"))
 )+
   theme_classic(base_size = 12) +
   annotate("text",
