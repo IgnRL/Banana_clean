@@ -1,0 +1,81 @@
+---
+title: "DADA2"
+output: html_document
+date: "2025-11-12"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r cars}
+library(dada2)
+library(tidyverse)
+library(phyloseq)
+library(Biostrings)
+```
+
+## Load the data
+
+```{r}
+
+#Phyloseq object
+zotu97 <- import_qiime("ITS_banana/p1031_run231023_ITS_ccs_ZOTU_c97_Count_Sintax.txt")
+original <- zotu97
+
+#Metadata
+metadata <- read.csv("raw_data/metadata_2025.csv" ) %>% 
+  column_to_rownames(var= "sample_name")
+metadata$pot <-interaction(metadata$treatment, metadata$rep, sep= "_")
+
+zotu97 <- merge_phyloseq(zotu97, sample_data(metadata))
+
+#Fasta file
+fasta_file <- "ITS_banana/p1031_run231023_ITS_ccs_ZOTU_c97.fa"
+seqs <- readDNAStringSet(fasta_file)
+
+#UNITE database
+unite_ref <- "dada2_trial/sh_general_release_dynamic_19.02.2025.fasta"
+
+
+```
+
+
+## Taxonomy assignment
+```{r}
+head(names(seqs))
+set.seed(5070)
+tax_assign <- assignTaxonomy(seqs, refFasta = unite_ref,
+                             multithread = TRUE, tryRC = TRUE, minBoot = 50)
+rownames(tax_assign) <- names(seqs)
+saveRDS(tax_assign, file= "dada2_trial/taxonomy_ITS_dada2.RDa")
+
+
+```
+
+
+## Merge the new tax assignment to phyloseq
+```{r}
+tax_table(zotu97) <- tax_table(tax_assign)
+```
+
+
+
+# Prepare plots to compare
+
+## DADA2 Assignment
+
+```{r}
+# Turn into rel abund.
+norm.dada<-  transform_sample_counts(zotu97, function(x) x / sum(x) )
+tax.dada <- tax_table(norm.dada) %>% data.frame()
+tax.sintax <- tax_table(original) %>% data.frame()
+
+#Compare to Syntax
+perc.NA <- data.frame("DADA2"= round(colSums(is.na(tax_table(norm.dada)))/nrow(tax.dada)*100,2),
+                      "Syntax"= round(colSums(is.na(tax_table(original)))/nrow(tax_table(original))*100,2))
+
+```
+

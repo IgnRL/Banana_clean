@@ -30,6 +30,7 @@ time.colors <- c("#BFD3E6", "#9ECAE1", "#6BAED6", "#4292C6", "#2171B5", "#08519C
 
 
 treat.order  <- c("control",  "chicken", "cow","compost", "pellet")
+treat.order1  <- c("control_amf",  "chicken", "cow","compost", "pellet")
 treat.labels <- c("Control",  "Chicken\nmanure", "Cow\nmanure","Compost", "Pelletised\ncompost")
 
 treat.colors_ok <- c("Control"  = "darkseagreen" , "Chicken\nmanure"= "royalblue1", "Cow\nmanure" = "red3","Pelletised\ncompost"= "darkorchid1","Compost"="chocolate4")
@@ -38,7 +39,7 @@ treat.colors_ok <- c("Control"  = "darkseagreen" , "Chicken\nmanure"= "royalblue
 ## Load data
 
 ```{r}
-zotu97 <- import_qiime("01_Raw_data/p1031_run231218_Revio_16S_ZOTU_c97_Count_Sintax.txt")
+zotu97 <- import_qiime("01_Raw_data/p1031_run231023_ITS_ccs_ZOTU_c97_Count_Sintax.txt")
 
 metadata <- read.csv("01_Raw_data/metadata_2025.csv" ) %>% 
   column_to_rownames(var= "sample_name")
@@ -80,150 +81,61 @@ zotu_tss_pct <- transform_sample_counts(
 )
 ```
 
-## Actinobacteria
+## Filamentous fungi
 
-```{r actinobacteria}
-cfu_actinobacteria<-readxl::read_excel("01_Raw_data/cfu_actinobacteria.xlsx")
+```{r fungi}
+cfu_fungi<-readxl::read_excel("01_Raw_data/cfu_fungi.xlsx")
 phy_phylum <- tax_glom(zotu_tss_pct, taxrank = "Phylum")
 
-actino_phy <- subset_taxa(
+fungi_phy <- subset_taxa(
   phy_phylum,
-  Phylum %in% c("Actinobacteriota", "Actinobacteria", "Actinomycetota")
-)
+ Phylum %in% c("Ascomycota"))
 
-actino_df <- psmelt(actino_phy) %>%
+fungi_df <- psmelt(fungi_phy) %>%
   dplyr::select(Sample, sample_ID, Abundance) %>%
-  rename(RA_actino = Abundance)
-actino_df <- as.data.frame(actino_df)
-actino_df <- psmelt(actino_phy) %>%
+  rename(RA_fungi = Abundance)
+fungi_df <- as.data.frame(fungi_df)
+rownames(fungi_df)
+
+fungi_df <- psmelt(fungi_phy) %>%
   group_by(Sample, sample_ID) %>%
-  summarise(RA_actino = sum(Abundance), .groups = "drop")
+  summarise(RA_fungi = sum(Abundance), .groups = "drop")
 
-cfu_actino_join <- cfu_actinobacteria %>%
-  left_join(actino_df, by = "sample_ID")
-
-#CORRELATION
-cfu_actino_join <- cfu_actino_join %>%
+cfu_fungi_join <- cfu_fungi %>%
+  left_join(fungi_df, by = "sample_ID")
+#CORRELATIONS
+cfu_fungi_join <- cfu_fungi_join %>%
   mutate(
-    log10_cfu = log10(cfu_g_soil), 
-    RA_actino_t = log10(RA_actino+1)
+    log10_fungi_cfu = log10(fungi_cfu_g_soil), 
+    RA_fungi_t=log10(RA_fungi + 1)
   )
-shapiro.test(cfu_actino_join$log10_cfu)
-shapiro.test(cfu_actino_join$RA_actino_t)
+cfu_fungi_join$sqrt_cfu <- sqrt(cfu_fungi_join$fungi_cfu_g_soil)
+shapiro.test(cfu_fungi_join$sqrt_cfu)
+shapiro.test(cfu_fungi_join$log10_fungi_cfu)
+shapiro.test(cfu_fungi_join$RA_fungi)
 
- 
-cor_test <- cor.test(
-  cfu_actino_join$log10_cfu,
-  cfu_actino_join$RA_actino_t,
+
+spearman_fungi <- cor.test(
+  cfu_fungi_join$log10_fungi_cfu,
+  cfu_fungi_join$RA_fungi,
   method = "spearman"
 )
+spearman_fungi
 
-cor_test
-rho_val <- cor_test$estimate
-p_val  <- cor_test$p.value
-rho_val
-p_val
+#lm_fungi <- lm(RA_fungi_t ~ log10_fungi_cfu, data = cfu_fungi_join)
+#summary(lm_fungi)
 
-label_text <- paste0(
-  "Spearman ρ = ", round(rho_val, 3),
-  "\n",
-  "p = ", format(p_val, scientific = FALSE, digits = 3)
+
+label_text_fungi <- sprintf(
+  "Spearman ρ = %.2f | p = %.3g",
+  spearman_fungi$estimate,
+  spearman_fungi$p.value
 )
+label_text_fungi
 
 ##graff
-actinobacteria_plot <- ggplot(cfu_actino_join,
-                              aes(x = log10_cfu, y = RA_actino)) +
-  geom_point(aes(color = treatment), size = 3, alpha = 0.8) +
-  geom_smooth(method = "lm", se = TRUE, color = "black") +
-  scale_color_manual(
-    values = treat.colors,
-    breaks = treat.order,
-    labels = treat.labels,
-    name   = "Treatment"
-  ) +
-  labs(
-    x = expression(log[10]~"CFU g"^{-1}~"soil (cutivable Actinobacteria)"),
-    y = "Relative abundance (%) (TSS)\n of putative cultivable Actinobacteria"
-  ) +
-  theme_classic(base_size = 12) +
-  annotate("text",
-           x = Inf, y = Inf,
-           hjust = 1.1, vjust = 1.3,
-           label = label_text,
-           size = 5,
-           fontface = "plain")
-
-actinobacteria_plot
-
-
-ggsave(actinobacteria_plot, file= "04_Figures/Supplemetary_FigureS7_Actinobacteria.png", width= 1900,height= 1200, units= "px")
-
-
-saveRDS(actinobacteria_plot, file = '03_Analysis_files//Supplementary_plot/Supplemetary_FigureS7_Actinobacteria.png')
-```
-
-## Bacteria
-
-```{r}
-bacteria<-readxl::read_excel("01_Raw_data/cfu_bacteria.xlsx")
-
-unique(tax_table(zotu_tss_pct)[, "Phylum"])
-
-bacteria_phy <- subset_taxa(
-  zotu_tss_pct,
-  Phylum %in% c("Firmicutes",
-                "Proteobacteria",
-                "Bacteroidota"))
-bacteria_phy
-unique(tax_table(bacteria_phy)[, "Phylum"])
-table(tax_table(bacteria_phy)[, "Phylum"])
-
-bacteria_df <- psmelt(bacteria_phy) %>%
-  dplyr::select(Sample, sample_ID, Abundance) %>%
-  rename(RA_bacteria = Abundance)
-bacteria_df <- as.data.frame(bacteria_df)
-rownames(bacteria_df) <- NULL
-
-
-bacteria_df <- psmelt(bacteria_phy) %>%
-  group_by(Sample, sample_ID) %>%
-  summarise(RA_bacteria = sum(Abundance), .groups = "drop")
-
-cfu_bacteria_join <- bacteria %>%
-  left_join(bacteria_df, by = "sample_ID")
-
-#CORRELATION
-cfu_bacteria_join <- cfu_bacteria_join %>%
-  mutate(
-    log10_bacteria_cfu = log10(bacteria_cfu_g_soil), 
-    RA_bacteria_t = log10(RA_bacteria),
-  )
-shapiro.test(cfu_bacteria_join$log10_bacteria_cfu)
-shapiro.test(cfu_bacteria_join$RA_bacteria_t)
-
-
-pearson_bact <- cor.test(
-  cfu_bacteria_join$log10_bacteria_cfu,
-  cfu_bacteria_join$RA_bacteria_t,
-  method = "pearson"
-)
-pearson_bact
-#model
-lm_bact <- lm(RA_bacteria_t ~ log10_bacteria_cfu, data = cfu_bacteria_join)
-summary(lm_bact)
-
-
-label_text_bact <- sprintf(
-  "Pearson r = %.2f | R² = %.2f | p = %.3g",
-  sqrt(summary(lm_bact)$r.squared) * sign(coef(lm_bact)[2]),
-  summary(lm_bact)$r.squared,
-  coef(summary(lm_bact))["log10_bacteria_cfu", "Pr(>|t|)"]
-)
-label_text_bact
-
-##graff
-bacteria_plot <- ggplot(cfu_bacteria_join,
-                              aes(x = log10_bacteria_cfu, y = RA_bacteria)) +
+fungi_plot <- ggplot(cfu_fungi_join,
+                              aes(x = log10_fungi_cfu, y = RA_fungi)) +
   geom_point(aes(color = treatment), size = 3, alpha = 0.8) +
   geom_smooth(method = "lm", se = TRUE, color = "black") +
   scale_color_manual(
@@ -233,21 +145,206 @@ bacteria_plot <- ggplot(cfu_bacteria_join,
     name   = "Treatment"
   ) +
   labs(
-    x = expression(log[10]~"CFU g"^{-1}~"soil (aerobic cultivable bacteria)"),
-    y = "Relative abundance (%) (TSS)\n of putative cultivable aerobic bacteria "
+    x = expression(log[10]~"CFU g"^{-1}~"soil (cultivable filamentous fungi)"),
+    y = "Relative abundance (%) (TSS)\n of putative cultivable filamentous fungi (Ascomycota)"
   ) +
   theme_classic(base_size = 12) +
   annotate("text",
            x = Inf, y = Inf,
            hjust = 1.2, vjust = 1.3,
-           label = label_text_bact,
+           label = label_text_fungi,
            size = 4)
 
-bacteria_plot
-ggsave(bacteria_plot, file= "04_Figures/Figure_4_Bacteria.png", width= 1900,height= 1200, units= "px")
+fungi_plot
 
 
-saveRDS(bacteria_plot, file = '03_Analysis_files/Figure_4_Bacteria.png')
+ggsave(fungi_plot, file= "04_Figures/Figure_4B_Fungi.png", width= 1900,height= 1200, units= "px")
+
+
+saveRDS(fungi_plot, file = '03_Analysis_files/Figure_4B_Fungi.rds')
+```
+
+## Trichoderma
+
+```{r trichoderma ra}
+tax_dada2 <- readRDS("01_Raw_Data/dada2_trial/taxonomy_ITS_dada2.RDa")
+zotu97 <- import_qiime("ITS_banana/p1031_run231023_ITS_ccs_ZOTU_c97_Count_Sintax.txt")
+
+
+zotu97 <- merge_phyloseq(zotu97, sample_data(metadata))
+# OTUs que están en ambos objetos
+otus_common <- intersect(taxa_names(zotu97), rownames(tax_dada2))
+
+length(otus_common)  
+# Crear matriz taxonómica ordenada según los taxa de zotu97
+tax_mat <- as.matrix(tax_dada2[ taxa_names(zotu97), , drop = FALSE ])
+
+# Asignar la tax_table de DADA2 al phyloseq
+tax_table(zotu97) <- tax_table(tax_mat)
+zotu97dada <- merge_phyloseq(zotu97, sample_data(metadata))
+
+
+otu_mat_dada <- otu_table(`zotu97dada`)
+
+if (taxa_are_rows(`zotu97dada`)) {
+  otu_mat_dada <- t(otu_mat_dada)          
+}
+otu_mat_dada <- as.matrix(otu_mat_dada)
+min_reads <- 3       # abundancia mínima
+min_samples <- 3     # número mínimo de muestras
+prevalence <- colSums(otu_mat_dada >= min_reads)
+keep_otus <- prevalence >= min_samples
+
+otu_filt_dada <- otu_mat_dada[, keep_otus, drop = FALSE]
+cat("ZOTUs ketp:", ncol(otu_filt_dada), "of", ncol(otu_mat_dada), "\n")
+##tranformation tss
+
+physeq_total_tss <- transform_sample_counts(zotu97dada, function(x) x / sum(x))
+
+tax_df <- as.data.frame(tax_table(physeq_total_tss))
+unique(tax_df$Genus)
+
+hypocreales_df <- tax_df %>% 
+  dplyr::filter(Family == "f__Hypocreaceae")
+
+otus_trichoderma <- setdiff(
+  rownames(hypocreales_df),
+  c("ZOTU2169", "ZOTU1901", "ZOTU1027")
+)
+
+otus_trichoderma
+length(otus_trichoderma)
+physeq_trichoderma <- prune_taxa(otus_trichoderma, physeq_total_tss)
+physeq_trichoderma
+
+
+
+trichoderma_melt <- psmelt(physeq_trichoderma) %>%
+  mutate(
+    treatment = factor(
+      treatment,
+      levels = treat.order,
+      labels = treat.labels
+    )
+  )
+
+melt_rel <- psmelt(physeq_trichoderma)
+trichoderma_relativa_total <- melt_rel %>%
+  filter(OTU %in% otus_trichoderma)
+
+trichoderma_sum <- trichoderma_relativa_total %>%
+  group_by(Sample, treatment) %>%
+  summarise(
+    trichoderma_percent = sum(Abundance),
+    .groups = "drop"
+  )
+trichoderma_sum <- trichoderma_sum %>%
+  mutate(treatment = factor(treatment, levels = treat.order))
+
+
+trichoderma_RA <- ggplot(trichoderma_sum,
+                         aes(x = treatment, y = trichoderma_percent)) +
+  geom_boxplot(
+    aes(fill = treatment),
+    alpha = 0.35,
+    width = 0.6,
+    linewidth = 0.6,
+    outlier.shape = NA
+  ) +
+  geom_jitter(
+    aes(color = treatment),
+    width  = 0.15,
+    size   = 2.2,
+    alpha  = 0.6
+  ) +
+  scale_fill_manual(values = treat.colors, breaks = treat.order, guide = "none") +
+  scale_color_manual(
+    values = treat.colors,
+    breaks = treat.order,
+    labels = treat.labels)+
+  labs(
+  x = "Treatment",
+  y = expression(italic("Trichoderma")~" relative abundance (%)")
+)+
+  scale_x_discrete(labels = setNames(treat.labels, treat.order)) +
+  theme_classic(base_size = 13) +
+  theme(legend.position = "none")
+
+trichoderma_RA
+ggsave(trichoderma_RA, file= "04_Figures/Figure_X_trichoderma.png", width= 1900,height= 1200, units= "px")
+
+
+saveRDS(trichoderma_RA, file = '03_Analysis_files/Figure_X_trichoderma.rds')
+
+
+```
+
+## Correlation
+
+```{r}
+cfu_trichoderma<-readxl::read_excel("01_Raw_Data/cfu_trichoderma.xlsx")
+
+physeq_trichoderma
+trichoderma_relativa_total
+
+trichoderma_relativa_total2 <- trichoderma_relativa_total %>%
+  dplyr::select(-treatment, -time)
+
+cfu_trichoderma_join <- cfu_trichoderma %>%
+  left_join(trichoderma_relativa_total2, by = "sample_ID")
+#CORRELATIONS
+cfu_trichoderma_join <- cfu_trichoderma_join%>%
+  mutate(
+    log10_tricho = log10(cfu_g+1), 
+    RA_tricho_t=log10(Abundance + 2)
+  )
+shapiro.test(cfu_trichoderma_join$log10_tricho)
+shapiro.test(cfu_trichoderma_join$RA_tricho_t)
+
+tricho_corre<-cor.test(
+  cfu_trichoderma_join$log10_tricho,
+  cfu_trichoderma_join$RA_tricho_t,
+  method = "spearman"
+)
+tricho_corre
+
+
+
+label_text_tricho <- sprintf(
+  "Spearman ρ = %.3f | p = %.4f",
+  tricho_corre$estimate,
+  tricho_corre$p.value
+)
+label_text_tricho
+##graff
+trichoderma_plot <- ggplot(cfu_trichoderma_join,
+                     aes(x = log10_tricho, y = Abundance)) +
+  geom_point(aes(color = treatment), size = 3, alpha = 0.8) +
+  geom_smooth(method = "lm", se = TRUE, color = "black") +
+  scale_color_manual(
+    values = treat.colors1,
+    breaks = treat.order1,
+    labels = treat.labels,
+    name   = "Treatment"
+  ) +
+ labs(
+  x = expression(log[10]~"CFU g"^{-1}~"soil ("*italic("Trichoderma")*")"),
+  y = expression("Relative abundance (% ITS, TSS) of "*italic("Trichoderma"))
+)+
+  theme_classic(base_size = 12) +
+  annotate("text",
+           x = Inf, y = Inf,
+           hjust = 1.2, vjust = 1.3,
+           label = label_text_tricho,
+           size = 4)
+ 
+  
+trichoderma_plot
+ggsave(trichoderma_plot, file= "04_Figures/Figure_XB_trichoderma.png", width= 1900,height= 1200, units= "px")
+
+
+saveRDS(trichoderma_plot, file = '03_Analysis_files/Figure_XB_trichoderma.rds')
+
 
 ```
 
