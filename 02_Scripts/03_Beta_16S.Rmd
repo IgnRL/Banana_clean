@@ -159,7 +159,7 @@ p_pca_clr <- ggplot(plot_df_clr, aes(PC1, PC2, color = treatment, shape = time))
 
 p_pca_clr
 
-ggsave(p_pca_clr, file= "04_Figures/Supplemetary_FigureS5_6S.png", width= 1900,height= 1200, units= "px")
+ggsave(p_pca_clr, file= "04_Figures/Supplemetary_FigureS5_16S.png", width= 1900,height= 1200, units= "px")
 
 
 saveRDS(p_pca_clr, file = '03_Analysis_files/Supplementary_plot/Supplemetary_FigureS5_16S.rds')
@@ -314,10 +314,10 @@ rda_alldata <- ggplot(sites, aes(x = RDA1, y = RDA2,
 
 
 rda_alldata
-ggsave(rda_alldata, file= "04_Figures/Figure2_16S.png", width= 1900,height= 1200, units= "px")
+ggsave(rda_alldata, file= "04_Figures/Figure_2_16S.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(rda_alldata, file = '03_Analysis_files/Figure2_16S.png')
+saveRDS(rda_alldata, file = '03_Analysis_files/Figure_2_16S.rds')
 
 
 ```
@@ -441,7 +441,7 @@ rda_alldata_plant
 ggsave(rda_alldata_plant, file= "04_Figures/Supplemetary_FigureS6_16S.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(rda_alldata_plant, file = '03_Analysis_files//Supplementary_plot/Supplemetary_FigureS6_16S.png')
+saveRDS(rda_alldata_plant, file = '03_Analysis_files//Supplementary_plot/Supplemetary_FigureS6_16S.rds')
 
 
 ```
