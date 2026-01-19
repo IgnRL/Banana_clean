@@ -1,0 +1,354 @@
+---
+title: "04_DAA_16S"
+author: "Ignacio Romero"
+date: "2026-01-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Libraries
+
+```{r}
+library(phyloseq)
+library(tidyverse)
+library(DESeq2)
+#BiocManager::install("apeglm")
+library(apeglm)
+# library(gridExtra)
+library(ANCOMBC)
+```
+
+
+
+## Plot colors
+```{r colors and order, include=FALSE}
+treat.colors <- c("control"  = "darkseagreen" , "chicken"= "royalblue1", "cow" = "red3","pellet"= "darkorchid1","compost"="chocolate4")
+
+time.colors <- c("#BFD3E6", "#9ECAE1", "#6BAED6", "#4292C6", "#2171B5", "#08519C")
+
+
+treat.order  <- c("control",  "chicken", "cow","compost", "pellet")
+treat.labels <- c("Control",  "Chicken\nmanure", "Cow\nmanure","Compost", "Pelletised\ncompost")
+
+treat.colors_ok <- c("Control"  = "darkseagreen" , "Chicken\nmanure"= "royalblue1", "Cow\nmanure" = "red3","Pelletised\ncompost"= "darkorchid1","Compost"="chocolate4")
+```
+
+## Load data
+
+```{r}
+zotu97 <- import_qiime("01_Raw_data/p1031_run231218_Revio_16S_ZOTU_c97_Count_Sintax.txt")
+
+metadata <- read.csv("01_Raw_data/metadata_2025.csv" ) %>% 
+  column_to_rownames(var= "sample_name")
+metadata$treat.pot <- paste(metadata$treatment, metadata$rep, sep= "_")
+
+zotu97 <- merge_phyloseq(zotu97, sample_data(metadata))
+
+
+taxonomy_16S_dada2 <- readRDS("03_Analysis_files/taxonomy_16S_dada2.RDa")
+
+tax_table(zotu97) <- tax_table(taxonomy_16S_dada2)
+```
+
+## Data Filtering
+
+```{r}
+## Remove those taxa that have less than 3 reads in 3 samples
+cleaning.function <- function(x) { x >  3}
+keep_taxa <- genefilter_sample(zotu97, cleaning.function, A = 3)
+zotu97<- prune_taxa(keep_taxa, zotu97)
+otu.table <- zotu97%>% otu_table() %>% data.frame()
+nrow(otu.table) 
+
+## Filter to remove < 0.01% 
+phy.rel <- transform_sample_counts(zotu97, function(x) x / sum(x))
+
+otus_to_keep <- taxa_names(phy.rel)[
+  apply(otu_table(phy.rel), 1, mean) >= 0.0001]
+
+zotu97 <- prune_taxa(otus_to_keep, zotu97)
+
+```
+
+# Differential Abundance Analysis
+
+```{r}
+set.seed(5070)
+```
+
+## DESeq2
+
+```{r}
+phy.chicken <- subset_samples(zotu97, treatment%in%c("control", "chicken"))
+phy.cow <- subset_samples(zotu97, treatment%in% c("control", "cow"))
+phy.pellet <- subset_samples(zotu97, treatment%in%c("control", "pellet"))
+phy.compost <- subset_samples(zotu97, treatment%in%c("control", "compost"))
+```
+
+### Chicken
+
+```{r deseq chicken}
+dds_chicken <- DESeqDataSetFromMatrix(countData = data.frame(otu_table(phy.chicken, taxa_are_rows = TRUE)),
+                                      colData = data.frame(sample_data(phy.chicken)),
+                                      design= ~treatment+time)
+dds_chicken <- DESeq(dds_chicken)
+
+res_chicken <- results(dds_chicken, contrast = c("treatment", "chicken", "control"))
+res_chicken<- lfcShrink(
+  dds_chicken,
+  coef = "treatment_control_vs_chicken",
+  type = "apeglm") %>% data.frame()%>% rownames_to_column(var= "OTU")
+```
+
+### Cow
+
+```{r deseq cow}
+dds_cow <- DESeqDataSetFromMatrix(countData = data.frame(otu_table(phy.cow, taxa_are_rows = TRUE)),
+                                      colData = data.frame(sample_data(phy.cow)),
+                                      design= ~treatment+time)
+dds_cow <- DESeq(dds_cow)
+
+res_cow <- results(dds_cow, contrast = c("treatment", "cow", "control"))
+resultsNames(dds_cow)
+res_cow<- lfcShrink(
+  dds_cow,
+  coef = "treatment_cow_vs_control",
+  type = "apeglm") %>% data.frame()%>% rownames_to_column(var= "OTU")
+```
+
+### Compost
+
+```{r deseq compost}
+dds_compost <- DESeqDataSetFromMatrix(countData = data.frame(otu_table(phy.compost, taxa_are_rows = TRUE)),
+                                      colData = data.frame(sample_data(phy.compost)),
+                                      design= ~treatment+time)
+dds_compost <- DESeq(dds_compost)
+
+res_compost <- results(dds_compost, contrast = c("treatment", "compost", "control"))
+resultsNames(dds_compost)
+res_compost<- lfcShrink(
+  dds_compost,
+  coef = "treatment_control_vs_compost",
+  type = "apeglm") %>% data.frame()%>% rownames_to_column(var= "OTU")
+```
+
+### Pellet
+
+```{r deseq pellet}
+dds_pellet <- DESeqDataSetFromMatrix(countData = data.frame(otu_table(phy.pellet, taxa_are_rows = TRUE)),
+                                      colData = data.frame(sample_data(phy.pellet)),
+                                      design= ~treatment+time)
+dds_pellet <- DESeq(dds_pellet)
+
+
+res_pellet <- results(dds_pellet, contrast = c("treatment", "pellet", "control"))
+resultsNames(dds_pellet)
+res_pellet<- lfcShrink(
+  dds_pellet,
+  coef = "treatment_pellet_vs_control",
+  type = "apeglm") %>% data.frame() %>% rownames_to_column(var= "OTU")
+
+
+```
+
+### Shape the data
+
+```{r deseq bind}
+
+res_chicken$treatment <- "chicken"
+res_compost$treatment <- "compost"
+res_cow$treatment <- "cow"
+res_pellet$treatment <- "pellet"
+
+res_all_bact_deseq <- rbind(res_chicken, res_compost, res_cow, res_pellet) 
+threshold_deseq <- quantile(abs(res_all_bact_deseq$log2FoldChange), 0.975, na.rm= TRUE) %>% as.numeric() 
+
+
+
+res_all_bact_deseq <- res_all_bact_deseq %>% mutate(selected=ifelse(padj<0.05 & abs(log2FoldChange)>threshold_deseq, res_all_bact_deseq$treatment, "no")) %>% na.omit()
+number_selected_deseq <-nrow(filter(res_all_bact_deseq, res_all_bact_deseq$selected!= "no"))
+```
+
+### Volcano Plot
+
+```{r deseq volcano}
+volcano_plot_deseq <- res_all_bact_deseq %>% 
+  ggplot(aes(x = log2FoldChange, y = -log10(padj), col= selected, )) +
+  geom_point(size= 3) +
+  geom_vline(xintercept = c(-1*(as.numeric(threshold_deseq)), as.numeric(threshold_deseq)), linetype = "dashed", color = "gray40") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "gray40") +
+  theme_classic()+
+  # # facet_wrap(~treatment, scales= "free", labeller = labeller(
+  #    treatment = c(
+  #      "chicken"     = "Chicken manure",
+  #      "cow"         = "Cow manure",
+  #      "compost"     = "Compost",
+  #      "pellet"      = "Pelletised compost"
+  #    )), strip.position= "top")+
+  theme(strip.placement = "outside")+
+  scale_color_manual(values= treat.colors, breaks = treat.order, labels= treat.labels )+
+  labs(title= paste("DESeq2"), 
+       subtitle = paste("Positive values are enriched in the treatment compared to the control.\n", 
+                        number_selected_deseq, "OTUs are above the set thresholds"))+
+  guides(color=guide_legend("Treatment"))+
+  facet_wrap(~treatment,nrow= 1, ncol = 4, 
+             labeller= as_labeller(c("chicken"= "Chicken", 
+                                     "compost"= "Compost",
+                                     "cow"=  "Cow",
+                                     "pellet"="Pellet")))
+
+volcano_plot_deseq
+
+ggsave(volcano_plot_deseq, file= "04_Figures/FigureX_16S.png", width= 1900,height= 1200, units= "px")
+
+
+saveRDS(volcano_plot_deseq, file = '03_Analysis_files/FigureX_16S.RDa')
+
+```
+
+## ANCOMBC
+
+### Chicken
+
+```{r ancombc chicken}
+phy.chicken <- subset_samples(zotu97, treatment %in% c("control", "chicken"))
+
+ancombc2_chicken <- ancombc2(
+  data = phy.chicken,
+  fix_formula = "treatment + time",
+  rand_formula = "(1 | treat.pot)",
+  p_adj_method = "BH",
+   n_cl = parallel::detectCores() - 1
+  )
+
+ancombc2_chicken <- ancombc2_chicken$res
+ancombc2_chicken <- data.frame(
+  taxon = ancombc2_chicken$taxon,
+  lfc = ancombc2_chicken$lfc_treatmentcontrol,
+  se = ancombc2_chicken$se_treatmentcontrol,
+  p_val = ancombc2_chicken$p_treatmentcontrol,
+  p_adj = ancombc2_chicken$q_treatmentcontrol)
+ancombc2_chicken$treatment <- "chicken"
+saveRDS(ancombc2_chicken, file= "03_Analysis_files/ancombc_chicken_bact.RDa")
+```
+
+```{r ancombc cow}
+phy.cow <- subset_samples(zotu97, treatment %in% c("control", "cow"))
+
+ancombc2_cow<- ancombc2(
+  data = phy.cow,
+  fix_formula = "treatment + time",
+  rand_formula = "(1 | treat.pot)",
+  p_adj_method = "BH"#,
+  # n_cl = parallel::detectCores() - 1
+  )
+
+ancombc2_cow <- ancombc2_cow$res
+ancombc2_cow <- data.frame(
+  taxon = ancombc2_cow$taxon,
+  lfc = ancombc2_cow$lfc_treatmentcow,
+  se = ancombc2_cow$se_treatmentcow,
+  p_val = ancombc2_cow$p_treatmentcow,
+  p_adj = ancombc2_cow$q_treatmentcow)
+ancombc2_cow$treatment <- "cow"
+
+
+saveRDS(ancombc2_cow, file= "03_Analysis_files/ancombc_cow_bact.RDa")
+```
+
+```{r ancomb compost}
+phy.compost<- subset_samples(zotu97, treatment %in% c("control", "compost"))
+
+ancombc2_compost <- ancombc2(
+  data = phy.compost,
+  fix_formula = "treatment + time",
+  rand_formula = "(1 | treat.pot)",
+  p_adj_method = "BH"#,
+  # n_cl = parallel::detectCores() - 1
+  )
+
+ancombc2_compost <- ancombc2_compost$res
+ancombc2_compost <- data.frame(
+  taxon = ancombc2_compost$taxon,
+  lfc = ancombc2_compost$lfc_treatmentcontrol,
+  se = ancombc2_compost$se_treatmentcontrol,
+  p_val = ancombc2_compost$p_treatmentcontrol,
+  p_adj = ancombc2_compost$q_treatmentcontrol)
+ancombc2_compost$treatment <- "compost"
+
+saveRDS(ancombc2_compost, file= "03_Analysis_files/ancombc_compost_bact.RDa")
+
+```
+
+
+```{r ancomb pellet}
+phy.pellet <- subset_samples(zotu97, treatment %in% c("control", "pellet"))
+
+ancombc2_pellet <- ancombc2(
+  data = phy.pellet,
+  fix_formula = "treatment + time",
+  rand_formula = "(1 | treat.pot)",
+  p_adj_method = "BH"#,
+  # n_cl = parallel::detectCores() - 1
+  )
+
+ancombc2_pellet <- ancombc2_pellet$res
+ancombc2_pellet <- data.frame(
+  taxon = ancombc2_pellet$taxon,
+  lfc = ancombc2_pellet$lfc_treatmentpellet,
+  se = ancombc2_pellet$se_treatmentpellet,
+  p_val = ancombc2_pellet$p_treatmentpellet,
+  p_adj = ancombc2_pellet$q_treatmentpellet)
+
+ancombc2_pellet$treatment <- "pellet"
+
+saveRDS(ancombc2_pellet, file= "03_Analysis_files/ancombc_pellet_bact.RDa")
+
+```
+
+
+```{r ancombc bind}
+res_all_bact_ancombc <- rbind(ancombc2_chicken, ancombc2_compost, ancombc2_cow, ancombc2_pellet) 
+
+threshold_ancombc<- quantile(abs(res_all_bact_ancombc$lfc), 0.975, na.rm= TRUE) %>% as.numeric() 
+res_all_bact_ancombc <- res_all_bact_ancombc %>% 
+  mutate(selected=ifelse(p_adj<0.05 & abs(lfc)>threshold_ancombc,
+                         res_all_bact_ancombc$treatment, "no")) %>%
+  na.omit()
+res_all_bact_ancombc$OTU <- res_all_bact_ancombc$taxon
+
+number_selected_ancombc <- sum(res_all_bact_ancombc$selected!= "no")
+
+```
+
+```{r ancomb volcano}
+volcano_plot_ancombc_16S <- res_all_bact_ancombc %>% 
+  ggplot(aes(x = lfc, y = -log10(p_adj), col= selected, )) +
+  geom_point(size= 3) +
+  geom_vline(xintercept = c(-threshold_ancombc, threshold_ancombc ), linetype = "dashed", color = "gray40") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "gray40") +
+  theme_classic()+
+  theme(strip.placement = "outside")+
+  scale_color_manual(values= treat.colors, breaks = treat.order, labels= treat.labels )+
+  labs(title= paste("ANCOMBC"),
+                    x= "Log2FoldChange")+#, 
+       # subtitle = paste("Positive values = Enriched in the treatment compared to the control.\n", 
+       #                  number_selected_ancombc, "OTUs are above the set thresholds")
+  guides(color=guide_legend("Treatment"))+
+  facet_wrap(~treatment,nrow= 1, ncol = 4, 
+             labeller= as_labeller(c("chicken"= "Chicken", 
+                                     "compost"= "Compost",
+                                     "cow"=  "Cow",
+                                     "pellet"="Pellet")))
+
+volcano_plot_ancombc_16S
+
+ggsave(volcano_plot_ancombc_16S, file= "04_Figures/FigureXX_16S.png", width= 1900,height= 1200, units= "px")
+
+
+saveRDS(volcano_plot_ancombc_16S, file = '03_Analysis_files/FigureXX_16S.RDa')
+```
