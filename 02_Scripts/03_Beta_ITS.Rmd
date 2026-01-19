@@ -303,10 +303,10 @@ rda_alldata <- ggplot(sites, aes(x = RDA1, y = RDA2,
 
 
 rda_alldata
-ggsave(rda_alldata, file= "04_Figures/Fig2_ITS.png", width= 1900,height= 1200, units= "px")
+ggsave(rda_alldata, file= "04_Figures/Figure_2_ITS.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(rda_alldata, file = '03_Analysis_files/Fig2_ITS.rds')
+saveRDS(rda_alldata, file = '03_Analysis_files/Figure_2_ITS.rds')
 
 
 ```
