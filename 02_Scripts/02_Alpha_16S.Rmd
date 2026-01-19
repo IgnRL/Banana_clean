@@ -222,7 +222,7 @@ evenness_treat_facet
 ggsave(evenness_treat_facet, file= "04_Figures/Supplemetary_FigureS4A16S.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(evenness_treat_facet, file = '03_Analysis_files/Supplementary_plot/Supplemetary_FigureS4A16S.png')
+saveRDS(evenness_treat_facet, file = '03_Analysis_files/Supplementary_plot/Supplemetary_FigureS4A16S.rds')
 
 ```
 
