@@ -150,6 +150,10 @@ p_pca_clr <- ggplot(plot_df_clr, aes(PC1, PC2, color = treatment, shape = time))
   ) +
   theme_classic()+
   theme(text = element_text(size = 12))+
+   theme(
+    text = element_text(size = 12),
+    legend.position = "bottom"
+  ) +
     geom_text(
   aes(x = Inf, y = Inf, label = perm_all),
   hjust = 1.1, vjust = 1.1,
@@ -159,7 +163,7 @@ p_pca_clr <- ggplot(plot_df_clr, aes(PC1, PC2, color = treatment, shape = time))
 
 p_pca_clr
 
-ggsave(p_pca_clr, file= "04_Figures/Supplemetary_FigureS5_ITS.png", width= 1900,height= 1200, units= "px")
+ggsave(p_pca_clr, file= "04_Figures/Supplemetary_FigureS5_ITS_leyenda.png", width= 1900,height= 1200, units= "px")
 
 
 saveRDS(p_pca_clr, file = '03_Analysis_files/Supplementary_plot/Supplemetary_FigureS5_ITS.rds')
@@ -292,7 +296,7 @@ rda_alldata <- ggplot(sites, aes(x = RDA1, y = RDA2,
        title = "RDA-Soil properties") +
   theme_classic(base_size = 13) +
   theme(panel.grid.minor = element_blank(),
-        legend.position = "right")+
+        legend.position = "none")+
   annotate(
     "text",
     x = Inf, y = Inf,
@@ -303,7 +307,7 @@ rda_alldata <- ggplot(sites, aes(x = RDA1, y = RDA2,
 
 
 rda_alldata
-ggsave(rda_alldata, file= "04_Figures/Figure_2_ITS.png", width= 1900,height= 1200, units= "px")
+ggsave(rda_alldata, file= "04_Figures/Figure_2_ITS.png", width= 2200,height= 1800, units= "px")
 
 
 saveRDS(rda_alldata, file = '03_Analysis_files/Figure_2_ITS.rds')
@@ -417,7 +421,7 @@ rda_alldata_plant <- ggplot(sites_plant, aes(x = RDA1, y = RDA2,
   theme_classic(base_size = 13) +
   coord_equal() +
   theme(panel.grid.minor = element_blank(),
-        legend.position = "right")+
+        legend.position = "none")+
    annotate(
     "text",
     x = Inf, y = Inf,
@@ -427,7 +431,7 @@ rda_alldata_plant <- ggplot(sites_plant, aes(x = RDA1, y = RDA2,
   )
 
 rda_alldata_plant
-ggsave(rda_alldata_plant, file= "04_Figures/Supplemetary_FigureS6_ITS.png", width= 1900,height= 1200, units= "px")
+ggsave(rda_alldata_plant, file= "04_Figures/Supplemetary_FigureS6_ITS.png", width= 2200,height= 1800, units= "px")
 
 
 saveRDS(rda_alldata_plant, file = '03_Analysis_files//Supplementary_plot/Supplemetary_FigureS6_ITS.rds')
