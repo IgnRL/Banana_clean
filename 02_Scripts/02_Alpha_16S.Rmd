@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
+
 library(phyloseq)
 library(tidyverse)
 library(vegan)
@@ -19,6 +20,7 @@ library(car)
 library(emmeans)
 library(lmerTest)
 library(lme4)
+
 
 ```
 
@@ -133,7 +135,7 @@ sample_table
 ```
 
 ```{r shannon}
-lmer.shannon <- lmer(shannon ~ time*treatment+(1|treat.pot) , data = sample_table)
+lmer.shannon <- lmerTest::lmer(shannon ~ time*treatment+(1|treat.pot) , data = sample_table)
 summary(lmer.shannon)
 
 #Repeated measures anova
@@ -171,10 +173,10 @@ shannon_treat_facet <- sample_table %>% ggplot(aes(x= time, y= shannon, color= t
   
 shannon_treat_facet
 
-ggsave(shannon_treat_facet, file= "04_Figures/Fig1_16S.png", width= 1900,height= 1200, units= "px")
+ggsave(shannon_treat_facet, file= "04_Figures/Supplemetary_FigureS4B16S.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(shannon_treat_facet, file = '03_Analysis_files/Supplementary_plot/Fig1_16S.rds')
+saveRDS(shannon_treat_facet, file = '03_Analysis_files/Supplementary_plot/Supplemetary_FigureS4B16S.rds')
 
 ```
 
@@ -266,9 +268,9 @@ richness_treat_facet <- sample_table %>% ggplot(aes(x= time, y= richness, color=
   
 richness_treat_facet
 
-ggsave(richness_treat_facet, file= "04_Figures/Supplemetary_FigureSB16S.png", width= 1900,height= 1200, units= "px")
+ggsave(richness_treat_facet, file= "04_Figures/Figure_1_16S.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(richness_treat_facet, file = '03_Analysis_files/Supplementary_plot/Supplemetary_FigureS4B16S.rds')
+saveRDS(richness_treat_facet, file = '03_Analysis_files/Figure_1_16S.rds')
 
 ```
