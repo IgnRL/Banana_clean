@@ -303,7 +303,7 @@ rda_alldata <- ggplot(sites, aes(x = RDA1, y = RDA2,
        title = "RDA-Soil properties") +
   theme_classic(base_size = 13) +
   theme(panel.grid.minor = element_blank(),
-        legend.position = "right")+
+        legend.position = "none")+
   annotate(
     "text",
     x = Inf, y = Inf,
@@ -314,7 +314,7 @@ rda_alldata <- ggplot(sites, aes(x = RDA1, y = RDA2,
 
 
 rda_alldata
-ggsave(rda_alldata, file= "04_Figures/Figure_2_16S.png", width= 1900,height= 1200, units= "px")
+ggsave(rda_alldata, file= "04_Figures/Figure_2_16S.png", width= 2200,height= 1800, units= "px")
 
 
 saveRDS(rda_alldata, file = '03_Analysis_files/Figure_2_16S.rds')
@@ -428,7 +428,7 @@ rda_alldata_plant <- ggplot(sites_plant, aes(x = RDA1, y = RDA2,
   theme_classic(base_size = 13) +
   coord_equal() +
   theme(panel.grid.minor = element_blank(),
-        legend.position = "right")+
+        legend.position = "none")+
    annotate(
     "text",
     x = Inf, y = Inf,
@@ -438,7 +438,7 @@ rda_alldata_plant <- ggplot(sites_plant, aes(x = RDA1, y = RDA2,
   )
 
 rda_alldata_plant
-ggsave(rda_alldata_plant, file= "04_Figures/Supplemetary_FigureS6_16S.png", width= 1900,height= 1200, units= "px")
+ggsave(rda_alldata_plant, file= "04_Figures/Supplemetary_FigureS6_16S.png", width= 2200,height= 1800, units= "px")
 
 
 saveRDS(rda_alldata_plant, file = '03_Analysis_files//Supplementary_plot/Supplemetary_FigureS6_16S.rds')
