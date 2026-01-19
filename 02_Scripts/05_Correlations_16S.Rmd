@@ -234,7 +234,7 @@ bacteria_plot <- ggplot(cfu_bacteria_join,
   ) +
   labs(
     x = expression(log[10]~"CFU g"^{-1}~"soil (aerobic cultivable bacteria)"),
-    y = "Relative abundance (%) (TSS)\n of putative cultivable aerobic bacteria "
+    y = "Relative abundance (%)of putative\n cultivable aerobic bacteria "
   ) +
   theme_classic(base_size = 12) +
   annotate("text",
