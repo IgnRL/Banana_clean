@@ -224,7 +224,7 @@ phylum.pal <- c(
   "Glomeromycota" = "#B0E0F4", 
   "Mortierellomycota" = "#D7C9E8",  
   "Less than 2%"      = "#F9E77F",   
-  "Unassigned" = "darkgrey")
+  "Unassigned" = "gray30")
 
 
 p_phyla2 <- ggplot(agg2, aes(x = 1, y = Abundance, fill = Taxonomy)) +
@@ -236,20 +236,19 @@ facet_grid(. ~ treatment, scales = "free_x", space = "free_x") +
     breaks = c("Ascomycota", "Basidiomycota", "Glomeromycota",
                "Mortierellomycota", "Less than 2%", "Unassigned")
   ) +
-  labs(y = "ITS Relative abundance (%)", x = NULL) +
+  labs(y = "Relative abundance (%) Fungi", x = NULL) +
   theme_classic(base_size = 12) +
   theme(
     legend.position   = "bottom",
     axis.text.x       = element_blank(),
     axis.ticks.x      = element_blank(),
-    axis.line   = element_line(linewidth = 0.2),
     strip.placement   = "outside",
-    strip.background = element_rect(
-    fill = NA,
-    colour = "black",
-    linewidth = 0.3),
     strip.text.x.top  = element_text(angle = 0, vjust = 0.5),
-    panel.spacing.x   = unit(0.1, "lines")) +
+    panel.spacing.x   = unit(0.1, "lines"), 
+    legend.title = element_text(size = 8),   # legend size
+  legend.text  = element_text(size = 7),
+    strip.background = element_rect(fill = NA,
+                                    linewidth = 0.3)) +
   guides(fill = guide_legend("Taxonomy", nrow = 1, byrow = TRUE))
 p_phyla2
 
