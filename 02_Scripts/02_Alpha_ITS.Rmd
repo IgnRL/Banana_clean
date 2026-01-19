@@ -264,9 +264,9 @@ richness_treat_facet <- sample_table %>% ggplot(aes(x= time, y= richness, color=
   
 richness_treat_facet
 
-ggsave(richness_treat_facet, file= "04_Figures/Figure1_ITS.png", width= 1900,height= 1200, units= "px")
+ggsave(richness_treat_facet, file= "04_Figures/Figure_1_ITS.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(richness_treat_facet, file = '03_Analysis_files/Figure1_ITS.rds')
+saveRDS(richness_treat_facet, file = '03_Analysis_files/Figure_1_ITS.rds')
 
 ```
