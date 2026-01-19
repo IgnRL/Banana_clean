@@ -159,7 +159,7 @@ actinobacteria_plot
 ggsave(actinobacteria_plot, file= "04_Figures/Supplemetary_FigureS7_Actinobacteria.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(actinobacteria_plot, file = '03_Analysis_files//Supplementary_plot/Supplemetary_FigureS7_Actinobacteria.png')
+saveRDS(actinobacteria_plot, file = '03_Analysis_files//Supplementary_plot/Supplemetary_FigureS7_Actinobacteria.rds')
 ```
 
 ## Bacteria
@@ -247,7 +247,7 @@ bacteria_plot
 ggsave(bacteria_plot, file= "04_Figures/Figure_4_Bacteria.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(bacteria_plot, file = '03_Analysis_files/Figure_4_Bacteria.png')
+saveRDS(bacteria_plot, file = '03_Analysis_files/Figure_4_Bacteria.rds')
 
 ```
 
