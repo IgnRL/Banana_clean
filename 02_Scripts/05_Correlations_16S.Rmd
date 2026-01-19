@@ -1,0 +1,253 @@
+---
+title: "05_Correlations_16"
+author: "raquel"
+date: "2026-01-19"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(phyloseq)
+library(tidyverse)
+library(vegan)
+library(rstatix)
+library(ggpubr)
+library(multcomp)
+
+```
+
+
+
+## Plot colors
+```{r colors and order, include=FALSE}
+treat.colors <- c("control"  = "darkseagreen" , "chicken"= "royalblue1", "cow" = "red3","pellet"= "darkorchid1","compost"="chocolate4")
+treat.colors1 <- c("control_amf"  = "darkseagreen" , "chicken"= "royalblue1", "cow" = "red3","pellet"= "darkorchid1","compost"="chocolate4")
+time.colors <- c("#BFD3E6", "#9ECAE1", "#6BAED6", "#4292C6", "#2171B5", "#08519C")
+
+
+treat.order  <- c("control",  "chicken", "cow","compost", "pellet")
+treat.labels <- c("Control",  "Chicken\nmanure", "Cow\nmanure","Compost", "Pelletised\ncompost")
+
+treat.colors_ok <- c("Control"  = "darkseagreen" , "Chicken\nmanure"= "royalblue1", "Cow\nmanure" = "red3","Pelletised\ncompost"= "darkorchid1","Compost"="chocolate4")
+```
+
+## Load data
+
+```{r}
+zotu97 <- import_qiime("01_Raw_data/p1031_run231218_Revio_16S_ZOTU_c97_Count_Sintax.txt")
+
+metadata <- read.csv("01_Raw_data/metadata_2025.csv" ) %>% 
+  column_to_rownames(var= "sample_name")
+metadata$treat.pot <- paste(metadata$treatment, metadata$rep, sep= "_")
+
+zotu97 <- merge_phyloseq(zotu97, sample_data(metadata))
+
+
+
+##modifiyin the table to change rowxcol
+otu_mat <- otu_table(`zotu97`)
+if (taxa_are_rows(`zotu97`)) {
+  otu_mat <- t(otu_mat)          
+}
+otu_mat <- as.matrix(otu_mat)
+min_reads <- 3       
+min_samples <- 3     
+prevalence <- colSums(otu_mat >= min_reads)
+keep_otus <- prevalence >= min_samples
+
+otu_filt <- otu_mat[, keep_otus, drop = FALSE]
+cat("ZOTUs kept:", ncol(otu_filt), "out of", ncol(otu_mat), "\n")
+
+
+zotu_filt <- phyloseq(
+  otu_table(otu_filt, taxa_are_rows = FALSE),
+  sample_data(sample_data(zotu97)),      
+  tax_table(tax_table(zotu97)[keep_otus, ])
+)
+zotu_filt
+```
+
+## TSS transformation
+
+```{r}
+zotu_tss_pct <- transform_sample_counts(
+  zotu_filt,
+  function(x) x / sum(x) * 100
+)
+```
+
+## Actinobacteria
+
+```{r actinobacteria}
+cfu_actinobacteria<-readxl::read_excel("01_Raw_data/cfu_actinobacteria.xlsx")
+phy_phylum <- tax_glom(zotu_tss_pct, taxrank = "Phylum")
+
+actino_phy <- subset_taxa(
+  phy_phylum,
+  Phylum %in% c("Actinobacteriota", "Actinobacteria", "Actinomycetota")
+)
+
+actino_df <- psmelt(actino_phy) %>%
+  dplyr::select(Sample, sample_ID, Abundance) %>%
+  rename(RA_actino = Abundance)
+actino_df <- as.data.frame(actino_df)
+actino_df <- psmelt(actino_phy) %>%
+  group_by(Sample, sample_ID) %>%
+  summarise(RA_actino = sum(Abundance), .groups = "drop")
+
+cfu_actino_join <- cfu_actinobacteria %>%
+  left_join(actino_df, by = "sample_ID")
+
+#CORRELATION
+cfu_actino_join <- cfu_actino_join %>%
+  mutate(
+    log10_cfu = log10(cfu_g_soil), 
+    RA_actino_t = log10(RA_actino+1)
+  )
+shapiro.test(cfu_actino_join$log10_cfu)
+shapiro.test(cfu_actino_join$RA_actino_t)
+
+ 
+cor_test <- cor.test(
+  cfu_actino_join$log10_cfu,
+  cfu_actino_join$RA_actino_t,
+  method = "spearman"
+)
+
+cor_test
+rho_val <- cor_test$estimate
+p_val  <- cor_test$p.value
+rho_val
+p_val
+
+label_text <- paste0(
+  "Spearman ρ = ", round(rho_val, 3),
+  "\n",
+  "p = ", format(p_val, scientific = FALSE, digits = 3)
+)
+
+##graff
+actinobacteria_plot <- ggplot(cfu_actino_join,
+                              aes(x = log10_cfu, y = RA_actino)) +
+  geom_point(aes(color = treatment), size = 3, alpha = 0.8) +
+  geom_smooth(method = "lm", se = TRUE, color = "black") +
+  scale_color_manual(
+    values = treat.colors,
+    breaks = treat.order,
+    labels = treat.labels,
+    name   = "Treatment"
+  ) +
+  labs(
+    x = expression(log[10]~"CFU g"^{-1}~"soil (cutivable Actinobacteria)"),
+    y = "Relative abundance (%) (TSS)\n of putative cultivable Actinobacteria"
+  ) +
+  theme_classic(base_size = 12) +
+  annotate("text",
+           x = Inf, y = Inf,
+           hjust = 1.1, vjust = 1.3,
+           label = label_text,
+           size = 5,
+           fontface = "plain")
+
+actinobacteria_plot
+
+
+ggsave(actinobacteria_plot, file= "04_Figures/Supplemetary_FigureS7_Actinobacteria.png", width= 1900,height= 1200, units= "px")
+
+
+saveRDS(actinobacteria_plot, file = '03_Analysis_files//Supplementary_plot/Supplemetary_FigureS7_Actinobacteria.png')
+```
+
+## Bacteria
+
+```{r}
+bacteria<-readxl::read_excel("01_Raw_data/cfu_bacteria.xlsx")
+
+unique(tax_table(zotu_tss_pct)[, "Phylum"])
+
+bacteria_phy <- subset_taxa(
+  zotu_tss_pct,
+  Phylum %in% c("Firmicutes",
+                "Proteobacteria",
+                "Bacteroidota"))
+bacteria_phy
+unique(tax_table(bacteria_phy)[, "Phylum"])
+table(tax_table(bacteria_phy)[, "Phylum"])
+
+bacteria_df <- psmelt(bacteria_phy) %>%
+  dplyr::select(Sample, sample_ID, Abundance) %>%
+  rename(RA_bacteria = Abundance)
+bacteria_df <- as.data.frame(bacteria_df)
+rownames(bacteria_df) <- NULL
+
+
+bacteria_df <- psmelt(bacteria_phy) %>%
+  group_by(Sample, sample_ID) %>%
+  summarise(RA_bacteria = sum(Abundance), .groups = "drop")
+
+cfu_bacteria_join <- bacteria %>%
+  left_join(bacteria_df, by = "sample_ID")
+
+#CORRELATION
+cfu_bacteria_join <- cfu_bacteria_join %>%
+  mutate(
+    log10_bacteria_cfu = log10(bacteria_cfu_g_soil), 
+    RA_bacteria_t = log10(RA_bacteria),
+  )
+shapiro.test(cfu_bacteria_join$log10_bacteria_cfu)
+shapiro.test(cfu_bacteria_join$RA_bacteria_t)
+
+
+pearson_bact <- cor.test(
+  cfu_bacteria_join$log10_bacteria_cfu,
+  cfu_bacteria_join$RA_bacteria_t,
+  method = "pearson"
+)
+pearson_bact
+#model
+lm_bact <- lm(RA_bacteria_t ~ log10_bacteria_cfu, data = cfu_bacteria_join)
+summary(lm_bact)
+
+
+label_text_bact <- sprintf(
+  "Pearson r = %.2f | R² = %.2f | p = %.3g",
+  sqrt(summary(lm_bact)$r.squared) * sign(coef(lm_bact)[2]),
+  summary(lm_bact)$r.squared,
+  coef(summary(lm_bact))["log10_bacteria_cfu", "Pr(>|t|)"]
+)
+label_text_bact
+
+##graff
+bacteria_plot <- ggplot(cfu_bacteria_join,
+                              aes(x = log10_bacteria_cfu, y = RA_bacteria)) +
+  geom_point(aes(color = treatment), size = 3, alpha = 0.8) +
+  geom_smooth(method = "lm", se = TRUE, color = "black") +
+  scale_color_manual(
+    values = treat.colors1,
+    breaks = treat.order,
+    labels = treat.labels,
+    name   = "Treatment"
+  ) +
+  labs(
+    x = expression(log[10]~"CFU g"^{-1}~"soil (aerobic cultivable bacteria)"),
+    y = "Relative abundance (%) (TSS)\n of putative cultivable aerobic bacteria "
+  ) +
+  theme_classic(base_size = 12) +
+  annotate("text",
+           x = Inf, y = Inf,
+           hjust = 1.2, vjust = 1.3,
+           label = label_text_bact,
+           size = 4)
+
+bacteria_plot
+ggsave(bacteria_plot, file= "04_Figures/Figure_4_Bacteria.png", width= 1900,height= 1200, units= "px")
+
+
+saveRDS(bacteria_plot, file = '03_Analysis_files/Figure_4_Bacteria.png')
+
+```
+
