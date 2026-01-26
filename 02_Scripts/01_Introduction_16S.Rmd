@@ -189,7 +189,7 @@ physeq_norm <- transform_sample_counts(zotu97, function(x) x / sum(x))
 phyla_total <- tax_table(zotu97)[, "Phylum"]   
 n_phyla <- length(unique(phyla_total[!is.na(phyla_total)]))
 
-n_phyla
+n_phyla #40
 
 
 ## 2) Collapse to Phylum
@@ -275,14 +275,14 @@ p_phyla_bac <- ggplot(agg2, aes(x = 1, y = Abundance, fill = Taxonomy)) +
     strip.text.x.top  = element_text(angle = 0, vjust = 0.5),
     panel.spacing.x   = unit(0.1, "lines"), 
     legend.title = element_text(size = 8),   # legend size
-  legend.text  = element_text(size = 7),
+  legend.text  = element_text(size = 5),
     strip.background = element_rect(fill = NA,
                                     linewidth = 0.3)) +
   guides(fill = guide_legend("Taxonomy", nrow = 2, byrow = TRUE))
 
 p_phyla_bac
 
-ggsave(p_phyla_bac, file= "04_Figures/SupplementaryFigure3_16S.png", width= 1900,height= 1200, units= "px")
+ggsave(p_phyla_bac, file= "04_Figures/SupplementaryFigure3_16S.png", width= 2000,height= 1200, units= "px")
 
 
 saveRDS(p_phyla_bac, file = '03_Analysis_files/Supplementary_plot/Supplementary3_16S.rds')

@@ -227,8 +227,6 @@ saveRDS(evenness_treat_facet, file = '03_Analysis_files/Supplementary_plot/Suppl
 ```
 
 
-
-
 ```{r richness}
 lmer.richness <- lmer(richness ~ time*treatment+(1|treat.pot) , data = sample_table)
 summary(lmer.richness)
