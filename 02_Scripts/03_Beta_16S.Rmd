@@ -16,6 +16,7 @@ library(vegan)
 library(rstatix)
 library(ggpubr)
 library(multcomp)
+library(ggrepel)
 
 ```
 
@@ -344,7 +345,7 @@ plant_T5 <- plant_data %>%
 stopifnot(!any(is.na(plant_T5$sample_id)))
 
 env_data_plant <- plant_T5%>%
-  dplyr::select(pseudostem, heigh, root_length, root_kg, leaves, area_foliar_m2, nitrogen, phosphorus, calcium , magnesium, sodium , potassium)
+  dplyr::select(pseudostem, heigh, root_length, root_kg, leaves, area_foliar_m2, nitrogen, phosphorus, calcium , magnesium, sodium , potassium, iron)
 rda_full_plant <- rda(otu_clr_T5 ~ ., data = env_data_plant)
 
 #envfit 
@@ -422,8 +423,7 @@ rda_alldata_plant <- ggplot(sites_plant, aes(x = RDA1, y = RDA2,
 )+
   labs(x = paste0("RDA1 (", rda1_perc, "%)"),
        y = paste0("RDA2 (", rda2_perc, "%)"),
-       color = "Treatment",
-       title = "RDA Plant") +
+       color = "Treatment") +
   theme_classic(base_size = 13) +
   coord_equal() +
   theme(panel.grid.minor = element_blank(),
