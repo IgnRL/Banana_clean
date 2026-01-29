@@ -18,6 +18,7 @@ library(DESeq2)
 library(apeglm)
 # library(gridExtra)
 library(ANCOMBC)
+library(microbiome)
 ```
 
 
@@ -188,9 +189,7 @@ volcano_plot_deseq <- res_all_bact_deseq %>%
   #    )), strip.position= "top")+
   theme(strip.placement = "outside")+
   scale_color_manual(values= treat.colors, breaks = treat.order, labels= treat.labels )+
-  labs(title= paste("DESeq2"), 
-       subtitle = paste("Positive values are enriched in the treatment compared to the control.\n", 
-                        number_selected_deseq, "OTUs are above the set thresholds"))+
+  labs(title= paste("DESeq2"))+
   guides(color=guide_legend("Treatment"))+
   facet_wrap(~treatment,nrow= 1, ncol = 4, 
              labeller= as_labeller(c("chicken"= "Chicken", 
@@ -200,10 +199,10 @@ volcano_plot_deseq <- res_all_bact_deseq %>%
 
 volcano_plot_deseq
 
-ggsave(volcano_plot_deseq, file= "04_Figures/FigureX_ITS.png", width= 1900,height= 1200, units= "px")
+ggsave(volcano_plot_deseq, file= "04_Figures/FigureX_ITS_deseq.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(volcano_plot_deseq, file = '03_Analysis_files/FigureX_ITS.RDa')
+saveRDS(volcano_plot_deseq, file = '03_Analysis_files/FigureX_ITS_deseq.RDa')
 
 ```
 
