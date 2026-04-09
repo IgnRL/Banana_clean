@@ -170,7 +170,7 @@ rarefaction_treatment <- rarecurve_meta %>% ggplot(aes(Reads, Species, col= trea
   scale_color_manual(values = treat.colors, labels= treat.labels, breaks = treat.order)+
   theme_classic()+
   labs(x= "Sequencing depth",
-       y= "Number of OTUs",
+       y= "16S Number of OTUs",
        col= "Treatment")
 
 ggsave(rarefaction_treatment, file= "04_Figures/SupplementaryFigure2_16S.png", width= 1900,height= 1200, units= "px")
