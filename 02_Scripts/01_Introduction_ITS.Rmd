@@ -195,47 +195,78 @@ agg <- molten %>%
   group_by(treatment, Phylum) %>%
   summarise(Abundance = mean(Abundance, na.rm = TRUE), .groups = "drop") %>%
   mutate(
-    Taxonomy  = if_else(Abundance >= 0.02, Phylum, "Less than 2%"),
+    Taxonomy = case_when(
+      is.na(Phylum)        ~ "Unassigned",
+      Abundance < 0.02     ~ "Less than 2%",
+      TRUE                 ~ as.character(Phylum)
+    ),
     treatment = factor(treatment, levels = treat.order, labels = treat.labels)
+  ) %>%
+  mutate(
+    Taxonomy = recode(
+      Taxonomy,
+      "Mortierellomycota" = "Mucoromycota"
+    )
   )
-## 4) NAs to Unassigned
-agg$Taxonomy[agg$Taxonomy %in% c("NA", NA)] <- "Unassigned"
 
+## 4) Regroup
 agg2 <- agg %>%
   group_by(treatment, Taxonomy) %>%
   summarise(Abundance = sum(Abundance), .groups = "drop") %>%
   group_by(treatment) %>%
   mutate(Abundance = Abundance / sum(Abundance)) %>%
   ungroup()
-agg %>% 
-  filter(str_detect(Phylum, "Glomeromycota"))
 
-## 5) Regroup
+## 5) Order taxa by total abundance, keeping Unassigned and Less than 2% at the bottom
+tax_order <- agg2 %>%
+  group_by(Taxonomy) %>%
+  summarise(total = sum(Abundance), .groups = "drop") %>%
+  arrange(desc(total)) %>%
+  pull(Taxonomy)
+
+final_levels <- c(
+  "Unassigned",
+  "Less than 2%",
+  setdiff(tax_order, c("Unassigned", "Less than 2%"))
+)
+
+agg2 <- agg2 %>%
+  mutate(
+    Taxonomy = factor(Taxonomy, levels = final_levels)
+  )
+
+## Check totals
 agg_check <- agg2 %>%
   group_by(treatment) %>%
   summarise(total = sum(Abundance), .groups = "drop")
 
 agg_check
 
-
+## Palette with updated names
 phylum.pal <- c(
-  "Ascomycota"        = "#A8D1BC",  
-  "Basidiomycota"     = "#F7C4B4",
-  "Glomeromycota" = "#B0E0F4", 
-  "Mortierellomycota" = "#D7C9E8",  
-  "Less than 2%"      = "#F9E77F",   
-  "Unassigned" = "gray30")
+  "Ascomycota"     = "#A8D1BC",
+  "Basidiomycota"  = "#F7C4B4",
+  "Glomeromycota"  = "#B0E0F4",
+  "Mucoromycota"   = "#D7C9E8",
+  "Less than 2%"   = "#F9E77F",
+  "Unassigned"     = "gray30"
+)
 
+setdiff(unique(agg2$Taxonomy), names(phylum.pal))
 
 p_phyla2 <- ggplot(agg2, aes(x = 1, y = Abundance, fill = Taxonomy)) +
-  geom_col(width = 0.6, color = "grey44", linewidth = 0.05) +
-facet_grid(. ~ treatment, scales = "free_x", space = "free_x") +
-  scale_y_continuous(labels = percent_format(accuracy = 1)) +
-  scale_fill_manual(
-    values = phylum.pal,
-    breaks = c("Ascomycota", "Basidiomycota", "Glomeromycota",
-               "Mortierellomycota", "Less than 2%", "Unassigned")
+  geom_col(
+    width = 0.6,
+    color = "grey44",
+    linewidth = 0.05,
+    position = position_stack(reverse = TRUE)
   ) +
+  facet_grid(. ~ treatment, scales = "free_x", space = "free_x") +
+  scale_y_continuous(
+    limits = c(0, 1),
+    labels = percent_format(accuracy = 1)
+  ) +
+  scale_fill_manual(values = phylum.pal) +
   labs(y = "Relative abundance (%) Fungi", x = NULL) +
   theme_classic(base_size = 12) +
   theme(
@@ -244,15 +275,15 @@ facet_grid(. ~ treatment, scales = "free_x", space = "free_x") +
     axis.ticks.x      = element_blank(),
     strip.placement   = "outside",
     strip.text.x.top  = element_text(angle = 0, vjust = 0.5),
-    panel.spacing.x   = unit(0.1, "lines"), 
-    legend.title = element_text(size = 8),   # legend size
-  legend.text  = element_text(size = 7),
-    strip.background = element_rect(fill = NA,
-                                    linewidth = 0.3)) +
-  guides(fill = guide_legend("Taxonomy", nrow = 1, byrow = TRUE))
-p_phyla2
+    panel.spacing.x   = unit(0.1, "lines"),
+    legend.title      = element_text(size = 8),
+    legend.text       = element_text(size = 11),
+    strip.background  = element_rect(fill = NA, linewidth = 0.3)
+  ) +
+  guides(fill = guide_legend("Taxonomy", nrow = 2, byrow = TRUE))
 
-ggsave(p_phyla2, file= "04_Figures/SupplementaryFigure3_ITS.png", width= 1900,height= 1200, units= "px")
+p_phyla2
+ggsave(p_phyla2, file= "04_Figures/SupplementaryFigure3_ITS_leyenda.png", width= 1900,height= 1200, units= "px")
 
 
 saveRDS(p_phyla2, file = '03_Analysis_files/Supplementary_plot/Supplementary3_ITS.rds')

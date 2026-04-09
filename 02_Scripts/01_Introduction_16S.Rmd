@@ -21,12 +21,12 @@ library(scales)
 
 ## Plot colors
 ```{r colors and order, include=FALSE}
-treat.colors <- c("control_amf"  = "darkseagreen" , "chicken"= "royalblue1", "cow" = "red3","pellet"= "darkorchid1","compost"="chocolate4")
+treat.colors <- c("control"  = "darkseagreen" , "chicken"= "royalblue1", "cow" = "red3","pellet"= "darkorchid1","compost"="chocolate4")
 
 time.colors <- c("#BFD3E6", "#9ECAE1", "#6BAED6", "#4292C6", "#2171B5", "#08519C")
 
 
-treat.order  <- c("control_amf",  "chicken", "cow","compost", "pellet")
+treat.order  <- c("control",  "chicken", "cow","compost", "pellet")
 treat.labels <- c("Control",  "Chicken\nmanure", "Cow\nmanure","Compost", "Pelletised\ncompost")
 
 treat.colors_ok <- c("Control"  = "darkseagreen" , "Chicken\nmanure"= "royalblue1", "Cow\nmanure" = "red3","Pelletised\ncompost"= "darkorchid1","Compost"="chocolate4")
@@ -222,12 +222,30 @@ agg <- molten %>%
 ## 4) NAs to Unassigned
 agg$Taxonomy[agg$Taxonomy %in% c("NA", NA)] <- "Unassigned"
 
-agg <- agg %>%
+agg <- molten %>%
+  group_by(treatment, Phylum) %>%
+  summarise(Abundance = mean(Abundance, na.rm = TRUE), .groups = "drop") %>% 
+  mutate(
+    Taxonomy = case_when(
+      is.na(Phylum)        ~ "Unassigned",      
+      Abundance < 0.02     ~ "Less than 2%",    
+      TRUE                 ~ as.character(Phylum)
+    ),
+    treatment = factor(treatment, levels = treat.order, labels = treat.labels)
+  ) %>%
+  mutate(
+    Taxonomy = recode(
+      Taxonomy,
+      "Proteobacteria"   = "Pseudomonadota",
+      "Firmicutes"       = "Bacillota",
+      "Actinobacteriota" = "Actinomycetota"
+    )
+  ) %>%
   mutate(
     Taxonomy = factor(
       Taxonomy,
-      levels = c(setdiff(unique(Taxonomy), "Unassigned"),
-                 "Unassigned")
+      levels = c(setdiff(unique(Taxonomy), "Less than 2%"),
+                 "Less than 2%")
     )
   )
 
@@ -239,17 +257,32 @@ agg2 <- agg %>%
   mutate(Abundance = Abundance / sum(Abundance)) %>%
   ungroup()
 
+tax_order <- agg2 %>%
+  group_by(Taxonomy) %>%
+  summarise(total = sum(Abundance), .groups = "drop") %>%
+  arrange(desc(total)) %>%
+  pull(Taxonomy)
+final_levels <- c(
+  "Unassigned",
+  "Less than 2%",
+  setdiff(tax_order, c("Unassigned", "Less than 2%"))
+)
+agg2 <- agg2 %>%
+  mutate(
+    Taxonomy = factor(Taxonomy, levels = final_levels)
+  )
+
 plotColorBarplot_16S <- c(
   "Cyanobacteria"      = "#8DD3C7",
-  "Actinobacteriota"   = "#B2D8EE",
+  "Actinomycetota"     = "#B2D8EE",
   "Bacteroidota"       = "#BEBADA",
   "Acidobacteriota"    = "#FB8072",
-  "Firmicutes"         = "#80B1D3",
+  "Bacillota"          = "#80B1D3",
   "Gemmatimonadota"    = "#FDB462",
   "Planctomycetota"    = "#B3DE69",
-  "Proteobacteria"     = "#FCCDE5",
-  "Myxococcota"  = "#256D3D",
-  "Chloroflexi"  = "#A34022",
+  "Pseudomonadota"     = "#FCCDE5",
+  "Myxococcota"        = "#256D3D",
+  "Chloroflexi"        = "#A34022",
   "Verrucomicrobiota"  = "#7C4D79",
   "Less than 2%"       = "#F9E77F",
   "Unassigned"         = "gray30"
@@ -258,7 +291,7 @@ plotColorBarplot_16S <- c(
 setdiff(unique(agg2$Taxonomy), names(plotColorBarplot_16S))
 
 p_phyla_bac <- ggplot(agg2, aes(x = 1, y = Abundance, fill = Taxonomy)) +
-  geom_col(width = 0.6, color = NA) +
+  geom_col(width = 0.6, color = NA, position = position_stack(reverse = TRUE)) +
   facet_grid(. ~ treatment, scales = "free_x", space = "free_x") +
   scale_y_continuous(
     limits = c(0, 1),
@@ -275,14 +308,14 @@ p_phyla_bac <- ggplot(agg2, aes(x = 1, y = Abundance, fill = Taxonomy)) +
     strip.text.x.top  = element_text(angle = 0, vjust = 0.5),
     panel.spacing.x   = unit(0.1, "lines"), 
     legend.title = element_text(size = 8),   # legend size
-  legend.text  = element_text(size = 5),
+  legend.text  = element_text(size = 10),
     strip.background = element_rect(fill = NA,
                                     linewidth = 0.3)) +
-  guides(fill = guide_legend("Taxonomy", nrow = 2, byrow = TRUE))
+  guides(fill = guide_legend("Taxonomy", nrow = 3, byrow = TRUE))
 
 p_phyla_bac
 
-ggsave(p_phyla_bac, file= "04_Figures/SupplementaryFigure3_16S.png", width= 2000,height= 1200, units= "px")
+ggsave(p_phyla_bac, file= "04_Figures/SupplementaryFigure3_16S_leyenda.png", width= 2000,height= 1200, units= "px")
 
 
 saveRDS(p_phyla_bac, file = '03_Analysis_files/Supplementary_plot/Supplementary3_16S.rds')
