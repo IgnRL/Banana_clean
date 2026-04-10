@@ -178,6 +178,8 @@ ggsave(shannon_treat_facet, file= "04_Figures/Supplemetary_FigureS4B16S.png", wi
 
 saveRDS(shannon_treat_facet, file = '03_Analysis_files/Supplementary_plot/Supplemetary_FigureS4B16S.rds')
 
+Supplemetary_FigureS4B16S
+ggsave(Supplemetary_FigureS4B16S, file= "04_Figures/Supplemetary_FigureS4B16S.png", width= 1900,height= 1200, units= "px")
 ```
 
 ```{r evenness}
@@ -223,6 +225,9 @@ ggsave(evenness_treat_facet, file= "04_Figures/Supplemetary_FigureS4A16S.png", w
 
 
 saveRDS(evenness_treat_facet, file = '03_Analysis_files/Supplementary_plot/Supplemetary_FigureS4A16S.rds')
+
+Supplemetary_FigureS4A16S
+ggsave(Supplemetary_FigureS4A16S, file= "04_Figures/Supplemetary_FigureS4A16S.png", width= 1900,height= 1200, units= "px")
 
 ```
 
@@ -270,5 +275,9 @@ ggsave(richness_treat_facet, file= "04_Figures/Figure_1_16S.png", width= 1900,he
 
 
 saveRDS(richness_treat_facet, file = '03_Analysis_files/Figure_1_16S.rds')
+
+Figure_1_16S
+ggsave(Figure_1_16S, file= "04_Figures/Figure_1_16S.png", width= 1900,height= 1200, units= "px")
+
 
 ```

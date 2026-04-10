@@ -146,17 +146,12 @@ p_pca_clr <- ggplot(plot_df_clr, aes(PC1, PC2, color = treatment, shape = time))
   labs(
     x = sprintf("PC1 (%.1f%%)", var_perc_clr[1]),
     y = sprintf("PC2 (%.1f%%)", var_perc_clr[2]),
-    title = "PCA", color = "Treatment",
+    title = "", color = "Treatment",
     shape = "Time"
   ) +
   theme_classic()+
-  theme(text = element_text(size = 12))+
-    geom_text(
-  aes(x = Inf, y = Inf, label = perm_all),
-  hjust = 1.1, vjust = 1.1,
-  size = 2.5,
-  color = "black"
-)
+  theme(text = element_text(family = "arial"))
+    #geom_text( aes(x = Inf, y = Inf, label = perm_all), hjust = 1.1, vjust = 1.1,size = 2.5, family="Arial")
 
 p_pca_clr
 
@@ -177,13 +172,13 @@ otu_clr
 
 #no selectec cfu, ni respiration
 env_data <- soil_data %>%
-  dplyr::select(org.matter, phosphorus, MOT,
-         calcium, magnesium, sodium, potassium, ph.water,
+  dplyr::select(OOM, phosphorus, MOT,
+         calcium, magnesium, sodium, potassium, pH,
          pH.chloride, conductivity, nitrogen)
 
 rda_full <- rda(otu_clr ~ ., data = env_data)
 summary(rda_full)
-vif.cca(rda_full) #Variance Inflation Factor) mide cuánta información redundante, 
+vif.cca(rda_full) #Variance Inflation Factor
 #delete COT and ph.water
 env_data_reduced <- env_data %>%
   dplyr::select(-pH.chloride)
@@ -198,9 +193,9 @@ set.seed(123)
 ##which variables
 rda_step <- ordiR2step(rda_null,
                        scope = formula(rda_reduced),
-                       direction = "forward", # añade y elimina variables
-                       R2scope = TRUE,# evita sobreajuste (controla R²
-                       pstep = 999) # número de permutaciones por paso
+                       direction = "forward", 
+                       R2scope = TRUE,# 
+                       pstep = 999) 
 
 
 step_df <- as.data.frame(rda_step$anova)
@@ -218,7 +213,7 @@ global_test<-anova(rda_step, permutations = 99) # test global del modelo
 axis_test<-anova(rda_step, by = "axis", permutations = 99) # cada eje RDA
 variable_test<-anova(rda_step, by = "terms", permutations = 99) # cada variable ambiental
 RsquareAdj(rda_step)
-
+rda_alldata <- readRDS("03_Analysis_files/Figure_2_16S.rds")
 
 ####para grafico######
 # Extraer el valor F y el p del test global
@@ -235,7 +230,7 @@ subtitle_text <- paste0(
 treat <- soil_data$treatment
 time  <- soil_data$time
 identical(soil_data$sample_id, rownames(otu_clr))
-
+rda_alldata <- readRDS("03_Analysis_files/Figure_2_16S.rds")
 # Extraer scores (sitios y flechas) con el mismo 'scaling'
 scal <- 2
 sc <- scores(rda_step, display = c("sites","bp"), scaling = scal)
@@ -275,6 +270,9 @@ arrows2$voffset <- ifelse(arrows2$len > 0, arrows2$RDA2 / arrows2$len * offset, 
 
 label_boost <- 2.5  # prueba 1.5–2.5 si se siguen pegando
 
+##load
+
+
 
 rda_alldata <- ggplot(sites, aes(x = RDA1, y = RDA2,
                         color = factor(treatment),
@@ -286,7 +284,6 @@ rda_alldata <- ggplot(sites, aes(x = RDA1, y = RDA2,
                      breaks = treat.order,
                      labels = treat.labels,
                      name   = "Treatment") +
-    # flechas de variables
   geom_segment(data = arrows2,
                aes(x = 0, y = 0, xend = RDA1, yend = RDA2),
                inherit.aes = FALSE, linewidth = 0.6, arrow = arrow(length = unit(0.25,"cm"))) +
@@ -296,26 +293,38 @@ rda_alldata <- ggplot(sites, aes(x = RDA1, y = RDA2,
       y = RDA2 ,
       label = var),
   inherit.aes = FALSE,
-  size = 5.5,
+  size = 12,
   color = "gray10") +
   labs(x = paste0("RDA1 (", rda1_perc, "%)"),
        y = paste0("RDA2 (", rda2_perc, "%)"),
        color = "Treatment", shape = "Time") +
-  theme_classic(base_size = 13) +
+  theme_classic(base_size=18) +
+  theme(
+    panel.grid.minor = element_blank(),
+    legend.position = "none",
+    axis.title = element_text(size = 18),
+    axis.text  = element_text(size = 18)
+  ) +
   theme(panel.grid.minor = element_blank(),
-        legend.position = "none")+
+        legend.position = "bottom")+
   annotate(
     "text",
     x = Inf, y = Inf,
     label = subtitle_text,
     hjust = 1.1, vjust = 1.3,
-    size = 5.5, 
+    size = 12, 
   )
 
+  p <- rda_alldata +
+ theme(
+    legend.position = "bottom",
+    legend.title = element_text(size = 11),
+    legend.text  = element_text(size = 9),
+    legend.key.size = unit(0.5, "cm")
+  )
 
-rda_alldata
-ggsave(rda_alldata, file= "04_Figures/Figure_2_16S.png", width= 2200,height= 1800, units= "px")
-
+ggsave(rda_alldata, file= "04_Figures/Figure_2_16S_leyenda.png", width= 2200,height= 1800, units= "px")
+ggsave(p, file= "04_Figures/Figure_2_16S_leyenda.png", width= 2200,height= 1800, units= "px")
 
 saveRDS(rda_alldata, file = '03_Analysis_files/Figure_2_16S.rds')
 
@@ -410,17 +419,7 @@ rda_alldata_plant <- ggplot(sites_plant, aes(x = RDA1, y = RDA2,
   geom_segment(data = arrows2_plant,
                aes(x = 0, y = 0, xend = RDA1, yend = RDA2),
                inherit.aes = FALSE, linewidth = 0.6, arrow = arrow(length = unit(0.18,"cm"))) +
-  geom_text_repel(
-  data = arrows2_plant,
-  aes(x = RDA1, y = RDA2, label = var),
-  inherit.aes = FALSE,
-  size = 4,
-  color = "gray10",
-  box.padding   = 0.35,   # espacio alrededor del texto (más = más separación)
-  point.padding = 0.25,   # separación respecto al extremo de la flecha
-  force         = 2,      # empuje (sube si sigue muy junto)
-  max.overlaps  = Inf
-)+
+  #geom_text_repel(data = arrows2_plant,aes(x = RDA1, y = RDA2, label = var),inherit.aes = FALSE,size = 4,color = "gray10",box.padding   = 0.35,   # espacio alrededor del texto (más = más separación)point.padding = 0.25,   # separación respecto al extremo de la flechaforce         = 2,      # empuje (sube si sigue muy junto)max.overlaps  = Inf)+
   labs(x = paste0("RDA1 (", rda1_perc, "%)"),
        y = paste0("RDA2 (", rda2_perc, "%)"),
        color = "Treatment") +

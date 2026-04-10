@@ -208,6 +208,24 @@ ggsave(volcano_plot_deseq, file= "04_Figures/FigureX_16S.png", width= 1900,heigh
 
 saveRDS(volcano_plot_deseq, file = '03_Analysis_files/FigureX_16S.RDa')
 
+plot <- readRDS("~/Banana_clean/03_Analysis_files/FigureX_16S.RDa")
+
+plot$data$treatment <- factor(
+  p$data$treatment,
+  levels = c("chicken", "cow", "compost", "pellet")
+)
+
+plot <- plot +
+  labs(x = expression(log[2]*"(Fold Change)")) +
+  theme(
+    strip.text = element_text(size = 14)
+  )
+
+plot
+
+
+plot
+ggsave(plot, file= "04_Figures/FigureX_16S.png", width= 1900,height= 1200, units= "px")
 ```
 
 ## ANCOMBC
@@ -308,11 +326,17 @@ ancombc2_pellet$treatment <- "pellet"
 
 saveRDS(ancombc2_pellet, file= "03_Analysis_files/ancombc_pellet_bact.RDa")
 
+pellet<-readRDS("~/Banana_clean/03_Analysis_files/ancombc_pellet_bact.RDa")
+cow<-readRDS("~/Banana_clean/03_Analysis_files/ancombc_cow_bact.RDa")
+compost<-readRDS("~/Banana_clean/03_Analysis_files/ancombc_compost_bact.RDa")
+chicken<-readRDS("~/Banana_clean/03_Analysis_files/ancombc_chicken_bact.RDa")
 ```
 
 
 ```{r ancombc bind}
-res_all_bact_ancombc <- rbind(ancombc2_chicken, ancombc2_compost, ancombc2_cow, ancombc2_pellet) 
+
+
+res_all_bact_ancombc <- rbind(chicken, compost, cow, pellet) 
 
 threshold_ancombc<- quantile(abs(res_all_bact_ancombc$lfc), 0.975, na.rm= TRUE) %>% as.numeric() 
 res_all_bact_ancombc <- res_all_bact_ancombc %>% 
@@ -334,8 +358,7 @@ volcano_plot_ancombc_16S <- res_all_bact_ancombc %>%
   theme_classic()+
   theme(strip.placement = "outside")+
   scale_color_manual(values= treat.colors, breaks = treat.order, labels= treat.labels )+
-  labs(title= paste("ANCOMBC"),
-                    x= "Log2FoldChange")+#, 
+  labs(x = expression(log[2]*"(Fold Change)")) +#, 
        # subtitle = paste("Positive values = Enriched in the treatment compared to the control.\n", 
        #                  number_selected_ancombc, "OTUs are above the set thresholds")
   guides(color=guide_legend("Treatment"))+
@@ -351,4 +374,20 @@ ggsave(volcano_plot_ancombc_16S, file= "04_Figures/FigureXX_16S.png", width= 190
 
 
 saveRDS(volcano_plot_ancombc_16S, file = '03_Analysis_files/FigureXX_16S.RDa')
+
+plot2 <- readRDS("~/Banana_clean/03_Analysis_files/FigureXX_16S.RDa")
+
+plot2$data$treatment <- factor(
+  p$data$treatment,
+  levels = c("chicken", "cow", "compost", "pellet")
+)
+
+plot2 <- plot2 +
+  labs(x = expression(log[2]*"(Fold Change)")) +
+  theme(
+    strip.text = element_text(size = 14)
+  )
+
+plot
+
 ```
