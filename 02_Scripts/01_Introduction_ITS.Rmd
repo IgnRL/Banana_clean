@@ -143,7 +143,7 @@ p_depth
 
 ggsave(p_depth, file= "04_Figures/SupplementaryFigure1_ITS.png", width= 1900,height= 1200, units= "px")
 
-rm(p_depth)
+
 
 saveRDS(p_depth, file = '03_Analysis_files/Supplementary_plot/Supplementary1_ITS.rds')
 ```

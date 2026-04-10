@@ -145,25 +145,19 @@ p_pca_clr <- ggplot(plot_df_clr, aes(PC1, PC2, color = treatment, shape = time))
   labs(
     x = sprintf("PC1 (%.1f%%)", var_perc_clr[1]),
     y = sprintf("PC2 (%.1f%%)", var_perc_clr[2]),
-    title = "PCA", color = "Treatment",
+    title = "", color = "Treatment",
     shape = "Time"
   ) +
   theme_classic()+
-  theme(text = element_text(size = 12))+
    theme(
-    text = element_text(size = 12),
-    legend.position = "bottom"
-  ) +
-    geom_text(
-  aes(x = Inf, y = Inf, label = perm_all),
-  hjust = 1.1, vjust = 1.1,
-  size = 3,
-  color = "black"
-)
+    legend.position = "right"
+  )+
+theme(text = element_text(size = 12))
+    #geom_text(aes(x = Inf, y = Inf, label = perm_all),hjust = 1.1, vjust = 1.1,size = 3,color = "black")
 
 p_pca_clr
 
-ggsave(p_pca_clr, file= "04_Figures/Supplemetary_FigureS5_ITS_leyenda.png", width= 1900,height= 1200, units= "px")
+ggsave(p_pca_clr, file= "04_Figures/Supplemetary_FigureS5_ITS.png", width= 1900,height= 1200, units= "px")
 
 
 saveRDS(p_pca_clr, file = '03_Analysis_files/Supplementary_plot/Supplemetary_FigureS5_ITS.rds')
@@ -312,6 +306,20 @@ ggsave(rda_alldata, file= "04_Figures/Figure_2_ITS.png", width= 2200,height= 180
 saveRDS(rda_alldata, file = '03_Analysis_files/Figure_2_ITS.rds')
 
 
+p<-Figure_2_ITS
+p$layers[[5]]$data$var <- dplyr::recode(
+  p$layers[[5]]$data$var,
+  "org.matter" = "OOM",
+  "ph.water" = "pH"
+)
+p <- p +
+  theme(
+    axis.title = element_text(size = 14),  # títulos: RDA1, RDA2
+    axis.text  = element_text(size = 14)   # números del eje
+  )
+p
+ggsave(p, file= "04_Figures/Figure_2_ITS_1.png", width= 2200,height= 1800, units= "px")
+
 ```
 
 ## RDA with plant parameters
@@ -388,6 +396,7 @@ names(arrows_plant)
 mult <-5
 arrows2_plant <- transform(arrows_plant, RDA1 = RDA1 * mult, RDA2 = RDA2 * mult)
 names(arrows2_plant)
+
 head(arrows2_plant)
 
 rda_alldata_plant <- ggplot(sites_plant, aes(x = RDA1, y = RDA2,
@@ -402,17 +411,7 @@ rda_alldata_plant <- ggplot(sites_plant, aes(x = RDA1, y = RDA2,
   geom_segment(data = arrows2_plant,
                aes(x = 0, y = 0, xend = RDA1, yend = RDA2),
                inherit.aes = FALSE, linewidth = 0.6, arrow = arrow(length = unit(0.18,"cm"))) +
-  geom_text_repel(
-  data = arrows2_plant,
-  aes(x = RDA1, y = RDA2, label = var),
-  inherit.aes = FALSE,
-  size = 4,
-  color = "gray10",
-  box.padding   = 0.35,   # espacio alrededor del texto (más = más separación)
-  point.padding = 0.25,   # separación respecto al extremo de la flecha
-  force         = 2,      # empuje (sube si sigue muy junto)
-  max.overlaps  = Inf
-)+
+  #geom_text_repel(data = arrows2_plant,aes(x = RDA1, y = RDA2, label = var),inherit.aes = FALSE,size= 4,color = "gray10",box.padding   = 0.35,   
   labs(x = paste0("RDA1 (", rda1_perc, "%)"),
        y = paste0("RDA2 (", rda2_perc, "%)"),
        color = "Treatment")+
