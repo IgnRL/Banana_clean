@@ -208,7 +208,7 @@ ggsave(volcano_plot_deseq, file= "04_Figures/FigureX_16S.png", width= 1900,heigh
 
 saveRDS(volcano_plot_deseq, file = '03_Analysis_files/FigureX_16S.RDa')
 
-plot <- readRDS("~/Banana_clean/03_Analysis_files/FigureX_16S.RDa")
+plot <- readRDS("03_Analysis_files/FigureX_16S.RDa")
 
 plot$data$treatment <- factor(
   p$data$treatment,
@@ -326,10 +326,10 @@ ancombc2_pellet$treatment <- "pellet"
 
 saveRDS(ancombc2_pellet, file= "03_Analysis_files/ancombc_pellet_bact.RDa")
 
-pellet<-readRDS("~/Banana_clean/03_Analysis_files/ancombc_pellet_bact.RDa")
-cow<-readRDS("~/Banana_clean/03_Analysis_files/ancombc_cow_bact.RDa")
-compost<-readRDS("~/Banana_clean/03_Analysis_files/ancombc_compost_bact.RDa")
-chicken<-readRDS("~/Banana_clean/03_Analysis_files/ancombc_chicken_bact.RDa")
+pellet<-readRDS("03_Analysis_files/ancombc_pellet_bact.RDa")
+cow<-readRDS("03_Analysis_files/ancombc_cow_bact.RDa")
+compost<-readRDS("03_Analysis_files/ancombc_compost_bact.RDa")
+chicken<-readRDS("03_Analysis_files/ancombc_chicken_bact.RDa")
 ```
 
 
@@ -375,7 +375,7 @@ ggsave(volcano_plot_ancombc_16S, file= "04_Figures/FigureXX_16S.png", width= 190
 
 saveRDS(volcano_plot_ancombc_16S, file = '03_Analysis_files/FigureXX_16S.RDa')
 
-plot2 <- readRDS("~/Banana_clean/03_Analysis_files/FigureXX_16S.RDa")
+plot2 <- readRDS("03_Analysis_files/FigureXX_16S.RDa")
 
 plot2$data$treatment <- factor(
   p$data$treatment,
