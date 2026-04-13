@@ -14,6 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 library(phyloseq)
+library(ggplot2)
 library(tidyverse)
 library(DESeq2)
 #BiocManager::install("apeglm")
@@ -208,24 +209,24 @@ ggsave(volcano_plot_deseq, file= "04_Figures/FigureX_16S.png", width= 1900,heigh
 
 saveRDS(volcano_plot_deseq, file = '03_Analysis_files/FigureX_16S.RDa')
 
-plot <- readRDS("03_Analysis_files/FigureX_16S.RDa")
+plot_deseq <- readRDS("03_Analysis_files/FigureX_16S.RDa")
 
-plot$data$treatment <- factor(
-  p$data$treatment,
+plot_deseq$data$treatment <- factor(
+  plot_deseq$data$treatment,
   levels = c("chicken", "cow", "compost", "pellet")
 )
 
-plot <- plot +
+plot_deseq <- plot_deseq +
   labs(x = expression(log[2]*"(Fold Change)")) +
-  theme(
-    strip.text = element_text(size = 14)
-  )
+  theme(legend.position = "none", strip.text = element_text(size = 16))+
+  theme(axis.title = element_text(size = 15), axis.text  = element_text(size = 15))+
+   labs(title = NULL, subtitle = NULL, caption= NULL)
+
+plot_deseq
+
 
 plot
-
-
-plot
-ggsave(plot, file= "04_Figures/FigureX_16S.png", width= 1900,height= 1200, units= "px")
+ggsave(plot_deseq, file= "04_Figures/FigureX_16S_revisado_deseq.png", width= 1900,height= 1200, units= "px")
 ```
 
 ## ANCOMBC
@@ -390,4 +391,22 @@ plot2 <- plot2 +
 
 plot
 
+###editar grafico 
+
+ancom_16s <- readRDS("~/Banana_clean/03_Analysis_files/FigureXX_16S.RDa")
+
+ancom_16s$data$treatment <- factor(
+  ancom_16s$data$treatment,
+  levels = c("chicken", "cow", "compost", "pellet")
+)
+
+ancom_16s <- ancom_16s +
+  labs(x = expression(log[2]*"(Fold Change)"))+
+  theme(legend.position = "none", strip.text = element_text(size = 16))+
+  labs(y = "-log10(padj)")+
+  theme(axis.title = element_text(size = 15), axis.text  = element_text(size = 15))
+
+ancom_16s
+
+ggsave(ancom_16s, file= "04_Figures/FigureXX_16S_revisado_ancom.png", width= 1900,height= 1200, units= "px")
 ```
