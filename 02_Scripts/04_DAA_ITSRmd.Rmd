@@ -204,6 +204,28 @@ ggsave(volcano_plot_deseq, file= "04_Figures/FigureX_ITS_deseq.png", width= 1900
 
 saveRDS(volcano_plot_deseq, file = '03_Analysis_files/FigureX_ITS_deseq.RDa')
 
+plot_deseq_its <- readRDS("03_Analysis_files/FigureX_ITS_deseq.RDa")
+
+plot_deseq_its$data$treatment <- factor(
+  plot_deseq_its$data$treatment,
+  levels = c("chicken", "cow", "compost", "pellet")
+)
+
+plot_deseq_its <- plot_deseq_its +
+  labs(x = expression(log[2]*"(Fold Change)")) +
+  theme(legend.position = "none", strip.text = element_text(size = 16))+
+  theme(axis.title = element_text(size = 15), axis.text  = element_text(size = 15))+
+   labs(title = NULL, subtitle = NULL, caption= NULL)
+
+plot_deseq_its
+
+
+
+ggsave(plot_deseq_its, file= "04_Figures/FigureX_ITS_revisado_deseq.png", width= 1900,height= 1200, units= "px")
+
+
+
+
 ```
 
 ## ANCOMBC
@@ -347,4 +369,24 @@ ggsave(volcano_plot_ancombc_ITS, file= "04_Figures/FigureXXX_ITS.png", width= 19
 
 
 saveRDS(volcano_plot_ancombc_ITS, file = '03_Analysis_files/FigureXXX_ITS.RDa')
+
+
+
+ancom_its <- readRDS("~/Banana_clean/03_Analysis_files/FigureXXX_ITS.RDa")
+
+ancom_its$data$treatment <- factor(
+  ancom_its$data$treatment,
+  levels = c("chicken", "cow", "compost", "pellet")
+)
+
+ancom_its <- ancom_its +
+  labs(x = expression(log[2]*"(Fold Change)"))+
+  theme(legend.position = "none", strip.text = element_text(size = 16))+
+  labs(y = "-log10(padj)")+
+  theme(axis.title = element_text(size = 15), axis.text  = element_text(size = 15))+
+labs(title = NULL, subtitle = NULL, caption= NULL)
+
+ancom_its
+
+ggsave(ancom_its, file= "04_Figures/FigureXX_ITS_revisado_ancom.png", width= 1900,height= 1200, units= "px")
 ```
