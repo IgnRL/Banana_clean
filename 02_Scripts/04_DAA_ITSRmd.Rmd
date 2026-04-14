@@ -313,6 +313,11 @@ saveRDS(ancombc2_pellet, file= "03_Analysis_files/ancombc_pellet_fungi.RDa")
 
 
 ```{r ancombc bind}
+ancombc2_chicken <- readRDS("03_Analysis_files/ancombc_chicken_fungi.RDa")
+ancombc2_compost <- readRDS("03_Analysis_files/ancombc_compost_fungi.RDa")
+ancombc2_cow <- readRDS("03_Analysis_files/ancombc_cow_fungi.RDa")
+ancombc2_pellet <- readRDS("03_Analysis_files/ancombc_pellet_fungi.RDa")
+
 res_all_fungi_ancombc <- rbind(ancombc2_chicken, ancombc2_compost, ancombc2_cow, ancombc2_pellet) 
 
 threshold_ancombc<- quantile(abs(res_all_fungi_ancombc$lfc), 0.975, na.rm= TRUE) %>% as.numeric() 
@@ -335,8 +340,7 @@ volcano_plot_ancombc_ITS <- res_all_fungi_ancombc %>%
   theme_classic()+
   theme(strip.placement = "outside")+
   scale_color_manual(values= treat.colors, breaks = treat.order, labels= treat.labels )+
-  labs(title= paste("ANCOMBC ITS"),
-                    x= "Log2FoldChange")+#, 
+  labs(x= "Log2FoldChange")+#, 
        # subtitle = paste("Positive values = Enriched in the treatment compared to the control.\n", 
        #                  number_selected_ancombc, "OTUs are above the set thresholds")
   guides(color=guide_legend("Treatment"))+
@@ -348,7 +352,21 @@ volcano_plot_ancombc_ITS <- res_all_fungi_ancombc %>%
 
 volcano_plot_ancombc_ITS
 
-ggsave(volcano_plot_ancombc_ITS, file= "04_Figures/FigureXXX_ITS.png", width= 1900,height= 1200, units= "px")
+volcano_plot_ancombc_ITS$data$treatment <- factor(
+  volcano_plot_ancombc_ITS$data$treatment,
+  levels = c("chicken", "cow", "compost", "pellet")
+)
+
+volcano_plot_ancombc_ITS <- volcano_plot_ancombc_ITS +
+  labs(x = expression(log[2]*"(Fold Change)"))+
+  theme(legend.position = "none", strip.text = element_text(size = 16))+
+  labs(y = "-log10(padj)")+
+  theme(axis.title = element_text(size = 15), axis.text  = element_text(size = 15))+
+  labs(title = NULL, subtitle = NULL, caption= NULL)
+
+volcano_plot_ancombc_ITS
+
+ggsave(volcano_plot_ancombc_ITS, file= "04_Figures/FigureXXX_ITS_ancom_revisado.png", width= 1900,height= 1200, units= "px")
 
 
 saveRDS(volcano_plot_ancombc_ITS, file = '03_Analysis_files/FigureXXX_ITS.RDa')
