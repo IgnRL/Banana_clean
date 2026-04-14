@@ -162,19 +162,19 @@ res_compost$treatment <- "compost"
 res_cow$treatment <- "cow"
 res_pellet$treatment <- "pellet"
 
-res_all_bact_deseq <- rbind(res_chicken, res_compost, res_cow, res_pellet) 
-threshold_deseq <- quantile(abs(res_all_bact_deseq$log2FoldChange), 0.975, na.rm= TRUE) %>% as.numeric() 
+res_all_fungi_deseq <- rbind(res_chicken, res_compost, res_cow, res_pellet) 
+threshold_deseq <- quantile(abs(res_all_fungi_deseq$log2FoldChange), 0.975, na.rm= TRUE) %>% as.numeric() 
 
 
 
-res_all_bact_deseq <- res_all_bact_deseq %>% mutate(selected=ifelse(padj<0.05 & abs(log2FoldChange)>threshold_deseq, res_all_bact_deseq$treatment, "no")) %>% na.omit()
-number_selected_deseq <-nrow(filter(res_all_bact_deseq, res_all_bact_deseq$selected!= "no"))
+res_all_fungi_deseq <- res_all_fungi_deseq %>% mutate(selected=ifelse(padj<0.05 & abs(log2FoldChange)>threshold_deseq, res_all_fungi_deseq$treatment, "no")) %>% na.omit()
+number_selected_deseq <-nrow(filter(res_all_fungi_deseq, res_all_fungi_deseq$selected!= "no"))
 ```
 
 ### Volcano Plot
 
 ```{r deseq volcano}
-volcano_plot_deseq <- res_all_bact_deseq %>% 
+volcano_plot_deseq <- res_all_fungi_deseq %>% 
   ggplot(aes(x = log2FoldChange, y = -log10(padj), col= selected, )) +
   geom_point(size= 3) +
   geom_vline(xintercept = c(-1*(as.numeric(threshold_deseq)), as.numeric(threshold_deseq)), linetype = "dashed", color = "gray40") +
@@ -204,28 +204,6 @@ ggsave(volcano_plot_deseq, file= "04_Figures/FigureX_ITS_deseq.png", width= 1900
 
 saveRDS(volcano_plot_deseq, file = '03_Analysis_files/FigureX_ITS_deseq.RDa')
 
-plot_deseq_its <- readRDS("03_Analysis_files/FigureX_ITS_deseq.RDa")
-
-plot_deseq_its$data$treatment <- factor(
-  plot_deseq_its$data$treatment,
-  levels = c("chicken", "cow", "compost", "pellet")
-)
-
-plot_deseq_its <- plot_deseq_its +
-  labs(x = expression(log[2]*"(Fold Change)")) +
-  theme(legend.position = "none", strip.text = element_text(size = 16))+
-  theme(axis.title = element_text(size = 15), axis.text  = element_text(size = 15))+
-   labs(title = NULL, subtitle = NULL, caption= NULL)
-
-plot_deseq_its
-
-
-
-ggsave(plot_deseq_its, file= "04_Figures/FigureX_ITS_revisado_deseq.png", width= 1900,height= 1200, units= "px")
-
-
-
-
 ```
 
 ## ANCOMBC
@@ -251,8 +229,10 @@ ancombc2_chicken <- data.frame(
   p_val = ancombc2_chicken$p_treatmentcontrol,
   p_adj = ancombc2_chicken$q_treatmentcontrol)
 ancombc2_chicken$treatment <- "chicken"
-saveRDS(ancombc2_chicken, file= "03_Analysis_files/ancombc_chicken_bact.RDa")
+saveRDS(ancombc2_chicken, file= "03_Analysis_files/ancombc_chicken_fungi.RDa")
 ```
+
+### Cow
 
 ```{r ancombc cow}
 phy.cow <- subset_samples(zotu97, treatment %in% c("control", "cow"))
@@ -275,8 +255,10 @@ ancombc2_cow <- data.frame(
 ancombc2_cow$treatment <- "cow"
 
 
-saveRDS(ancombc2_cow, file= "03_Analysis_files/ancombc_cow_bact.RDa")
+saveRDS(ancombc2_cow, file= "03_Analysis_files/ancombc_cow_fungi.RDa")
 ```
+
+### Compost
 
 ```{r ancomb compost}
 phy.compost<- subset_samples(zotu97, treatment %in% c("control", "compost"))
@@ -298,10 +280,11 @@ ancombc2_compost <- data.frame(
   p_adj = ancombc2_compost$q_treatmentcontrol)
 ancombc2_compost$treatment <- "compost"
 
-saveRDS(ancombc2_compost, file= "03_Analysis_files/ancombc_compost_bact.RDa")
+saveRDS(ancombc2_compost, file= "03_Analysis_files/ancombc_compost_fungi.RDa")
 
 ```
 
+### Pellet
 
 ```{r ancomb pellet}
 phy.pellet <- subset_samples(zotu97, treatment %in% c("control", "pellet"))
@@ -324,27 +307,27 @@ ancombc2_pellet <- data.frame(
 
 ancombc2_pellet$treatment <- "pellet"
 
-saveRDS(ancombc2_pellet, file= "03_Analysis_files/ancombc_pellet_bact.RDa")
+saveRDS(ancombc2_pellet, file= "03_Analysis_files/ancombc_pellet_fungi.RDa")
 
 ```
 
 
 ```{r ancombc bind}
-res_all_bact_ancombc <- rbind(ancombc2_chicken, ancombc2_compost, ancombc2_cow, ancombc2_pellet) 
+res_all_fungi_ancombc <- rbind(ancombc2_chicken, ancombc2_compost, ancombc2_cow, ancombc2_pellet) 
 
-threshold_ancombc<- quantile(abs(res_all_bact_ancombc$lfc), 0.975, na.rm= TRUE) %>% as.numeric() 
-res_all_bact_ancombc <- res_all_bact_ancombc %>% 
+threshold_ancombc<- quantile(abs(res_all_fungi_ancombc$lfc), 0.975, na.rm= TRUE) %>% as.numeric() 
+res_all_fungi_ancombc <- res_all_fungi_ancombc %>% 
   mutate(selected=ifelse(p_adj<0.05 & abs(lfc)>threshold_ancombc,
-                         res_all_bact_ancombc$treatment, "no")) %>%
+                         res_all_fungi_ancombc$treatment, "no")) %>%
   na.omit()
-res_all_bact_ancombc$OTU <- res_all_bact_ancombc$taxon
+res_all_fungi_ancombc$OTU <- res_all_fungi_ancombc$taxon
 
-number_selected_ancombc <- sum(res_all_bact_ancombc$selected!= "no")
+number_selected_ancombc <- sum(res_all_fungi_ancombc$selected!= "no")
 
 ```
 
 ```{r ancomb volcano}
-volcano_plot_ancombc_ITS <- res_all_bact_ancombc %>% 
+volcano_plot_ancombc_ITS <- res_all_fungi_ancombc %>% 
   ggplot(aes(x = lfc, y = -log10(p_adj), col= selected, )) +
   geom_point(size= 3) +
   geom_vline(xintercept = c(-threshold_ancombc, threshold_ancombc ), linetype = "dashed", color = "gray40") +
@@ -369,24 +352,4 @@ ggsave(volcano_plot_ancombc_ITS, file= "04_Figures/FigureXXX_ITS.png", width= 19
 
 
 saveRDS(volcano_plot_ancombc_ITS, file = '03_Analysis_files/FigureXXX_ITS.RDa')
-
-
-
-ancom_its <- readRDS("~/Banana_clean/03_Analysis_files/FigureXXX_ITS.RDa")
-
-ancom_its$data$treatment <- factor(
-  ancom_its$data$treatment,
-  levels = c("chicken", "cow", "compost", "pellet")
-)
-
-ancom_its <- ancom_its +
-  labs(x = expression(log[2]*"(Fold Change)"))+
-  theme(legend.position = "none", strip.text = element_text(size = 16))+
-  labs(y = "-log10(padj)")+
-  theme(axis.title = element_text(size = 15), axis.text  = element_text(size = 15))+
-labs(title = NULL, subtitle = NULL, caption= NULL)
-
-ancom_its
-
-ggsave(ancom_its, file= "04_Figures/FigureXX_ITS_revisado_ancom.png", width= 1900,height= 1200, units= "px")
 ```
