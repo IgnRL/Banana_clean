@@ -224,7 +224,7 @@ volcano_plot_deseq <- res_all_bact_deseq %>%
   #    )), strip.position= "top")+
   theme(strip.placement = "outside")+
   scale_color_manual(values= treat.colors, breaks = treat.order, labels= treat.labels )+
-  labs(title= paste("DESeq2"), 
+  labs(title= paste("DESeq2"), y = expression(-log[10]*"(padj)"),
        subtitle = paste("Positive values are enriched in the treatment compared to the control.\n", 
                         number_selected_deseq, "OTUs are above the set thresholds"))+
   guides(color=guide_legend("Treatment"))+
@@ -249,16 +249,16 @@ plot_deseq$data$treatment <- factor(
 )
 
 plot_deseq <- plot_deseq +
-  labs(x = expression(log[2]*"(Fold Change)")) +
+  labs(x = expression(log[2]*"(Fold Change)"))+
   theme(legend.position = "none", strip.text = element_text(size = 16))+
-  theme(axis.title = element_text(size = 15), axis.text  = element_text(size = 15))+
-   labs(title = NULL, subtitle = NULL, caption= NULL)
+  labs(y = expression(-log[10]*"(padj)"))+
+  theme(axis.title = element_text(size = 15), axis.text  = element_text(size = 10))
 
 plot_deseq
 
 
 plot
-ggsave(plot_deseq, file= "04_Figures/FigureX_16S_revisado_deseq.png", width= 1900,height= 1200, units= "px")
+ggsave(plot_deseq, file= "04_Figures/FigureX_16S_revisado_2_deseq.png", width= 1900,height= 1200, units= "px")
 ```
 
 ## ANCOMBC
@@ -421,7 +421,7 @@ volcano_plot_ancombc_16S <- res_all_bact_ancombc %>%
   theme_classic()+
   theme(strip.placement = "outside")+
   scale_color_manual(values= treat.colors, breaks = treat.order, labels= treat.labels )+
-  labs(x = expression(log[2]*"(Fold Change)")) +#, 
+  labs(x = expression(log[2]*"(Fold Change)"), y = expression(-log[10]*"(padj)")) +#, 
        # subtitle = paste("Positive values = Enriched in the treatment compared to the control.\n", 
        #                  number_selected_ancombc, "OTUs are above the set thresholds")
   guides(color=guide_legend("Treatment"))+
@@ -465,8 +465,8 @@ ancom_16s$data$treatment <- factor(
 ancom_16s <- ancom_16s +
   labs(x = expression(log[2]*"(Fold Change)"))+
   theme(legend.position = "none", strip.text = element_text(size = 16))+
-  labs(y = "-log10(padj)")+
-  theme(axis.title = element_text(size = 15), axis.text  = element_text(size = 15))
+  labs(y = expression(-log[10]*"(padj)"))+
+  theme(axis.title = element_text(size = 15), axis.text  = element_text(size = 10))
 
 ancom_16s
 

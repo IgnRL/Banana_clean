@@ -41,7 +41,7 @@
 #
 # HOW TO READ THE FIGURE (Part B)
 #   * One panel per amendment. y axis: families with at least one selected OTU,
-#     grouped by phylum and ordered by mean log2FC, with the number of selected
+#     grouped by phylum and ordered alphabetically, with the number of selected
 #     OTUs in parentheses, e.g. "Bacillaceae (5)".
 #   * x axis: log2 fold change (amendment vs control); positive = enriched in
 #     the amendment.
@@ -128,8 +128,8 @@ slot_span    <- 0.25   # OTUs of the same family spread over +/- this around the
 
 # Order and labels of the panels
 contrast_levels <- c("chicken", "cow", "compost", "pellet")
-contrast_labels <- c(chicken = "Chicken manure", cow = "Cow manure",
-                     compost = "Compost",       pellet = "Pelletised compost")
+contrast_labels <- c(chicken = "Chicken", cow = "Cow",
+                     compost = "Compost",       pellet = "Pellet")
 
 # Phylum colours: the same palette used for the taxonomy barplot (plotColorBarplot_16S).
 # "Chloroflexota" (the name in the dada2 taxonomy) shares the colour of
@@ -442,7 +442,7 @@ keep_families <- points_all %>%
 points_all <- dplyr::filter(points_all, taxon_label %in% keep_families)
 
 
-# ---- 14. Row order: grouped by phylum, then by mean log2FC --------------------
+# ---- 14. Row order: grouped by phylum, then alphabetical --------------------
 # Phyla ordered by number of selected OTUs (most frequent first); the rows and
 # the legend follow this order.
 phylum_levels <- points_all %>%
@@ -458,7 +458,7 @@ family_order <- points_all %>%
             .groups  = "drop") %>%
   mutate(phylum_rank = match(Phylum, phylum_levels),
          axis_label  = paste0(taxon_label, " (", n_otu, ")")) %>%   # e.g. "Bacillaceae (5)"
-  arrange(phylum_rank, mean_lfc) %>%
+  arrange(phylum_rank, tolower(taxon_label)) %>%    # phylum, then A-Z (top to bottom)
   # y position of the family row: first row on top (largest y value)
   mutate(y_base = rev(seq_len(n())))
 
@@ -529,22 +529,22 @@ dotplot <- ggplot(plot_df, aes(x = lfc, y = y)) +
   scale_y_continuous(breaks = family_order$y_base, labels = family_order$axis_label,
                      expand = expansion(add = 0.7)) +
   # legends: make shapes visible in the colour legend and vice versa
-  guides(fill  = guide_legend(order = 1, override.aes = list(shape = 21, size = 4)),
-         shape = guide_legend(order = 2, override.aes = list(fill = "#898781", size = 4)),
+  guides(fill  = guide_legend(order = 1, override.aes = list(shape = 21, size = 6)),
+         shape = guide_legend(order = 2, override.aes = list(fill = "#898781", size = 6)),
          size  = guide_legend(order = 3)) +
-  labs(x = "log2 fold change (amendment vs control)", y = "Family") +
-  theme_minimal(base_size = 11) +
+  labs(x = expression(log[2]*"(Fold Change)"), y= "Family")+
+  theme_minimal(base_size = 12) +
   theme(
     panel.grid.minor    = element_blank(),
     panel.grid.major.x  = element_line(colour = "#e1e0d9", linewidth = 0.3),
     panel.grid.major.y  = element_line(colour = "#c3c2b7", linewidth = 0.3, linetype = "dashed"),
     panel.border        = element_rect(colour = "#c3c2b7", fill = NA),
-    axis.text.y         = element_text(face = "italic", colour = "#0b0b0b"),
+    axis.text.y         = element_text(face = "italic", colour = "black"),
     axis.text.x         = element_text(colour = "#52514e"),
-    strip.text          = element_text(size = 12, face = "bold", colour = "#0b0b0b"),
+    strip.text          = element_text(size = 16, face = "bold", colour = "black"),
     plot.caption        = element_text(colour = "#52514e", hjust = 0),
-    legend.position     = "right"
-  )
+    legend.position     = "right",
+    axis.title = element_text(size = 15), axis.text  = element_text(size = 13))
 
 dotplot
 
@@ -552,7 +552,7 @@ dotplot
 # ---- 19. Save -----------------------------------------------------------------
 n_fam <- nrow(family_order)
 ggsave(out_png, dotplot, width = 13, height = max(5, 0.22 * n_fam + 2.5),
-       dpi = 300, bg = "white")        # taller figure when there are more families
+       dpi = 600, bg = "white")        # taller figure when there are more families
 saveRDS(dotplot, out_plot)
 write_csv(dplyr::select(plot_df, OTU, contrast, method, taxon_label, Phylum,
                         lfc, padj, neg_log_padj, y),
