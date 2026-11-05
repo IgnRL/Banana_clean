@@ -32,7 +32,7 @@ if (basename(getwd()) == "02_Scripts") setwd("..")
 # ---- Settings ---------------------------------------------------------------
 # TRUE  = only OTUs selected by BOTH methods in that treatment (as in the dot plots)
 # FALSE = OTUs selected by EITHER method (the other method's values are still shown)
-only_both_methods <- FALSE
+only_both_methods <- TRUE
 
 # ANCOM-BC2 values are natural log -> divide by log(2). FALSE if already log2.
 ancombc_is_natural_log <- TRUE
