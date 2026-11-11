@@ -74,7 +74,7 @@ sample_data(zotu97)
 ### Check indexes normality
 
 
-```{r shanon}
+```{r normality-shannon}
 sample_table %>% 
   shapiro_test(shannon)
 
@@ -91,7 +91,7 @@ ggqqplot(data=sample_table, "shannon", facet.by= "treatment")
 # Same as above
 ```
 
-```{r evenness}
+```{r normality-evenness}
 sample_table %>% 
   shapiro_test(evenness)
 
@@ -108,7 +108,7 @@ ggqqplot(data=sample_table, "evenness", facet.by= "treatment")
 # Same as above
 ```
 
-```{r richness}
+```{r normality-richness}
 sample_table %>% 
   shapiro_test(richness)
 
@@ -134,7 +134,7 @@ sample_table <- sample_table %>%
 sample_table
 ```
 
-```{r shannon}
+```{r model-shannon}
 lmer.shannon <- lmerTest::lmer(shannon ~ time*treatment+(1|treat.pot) , data = sample_table)
 summary(lmer.shannon)
 
@@ -182,7 +182,7 @@ Supplemetary_FigureS4B16S
 ggsave(Supplemetary_FigureS4B16S, file= "../04_Figures/Supplemetary_FigureS4B16S.png", width= 1900,height= 1200, units= "px")
 ```
 
-```{r evenness}
+```{r model-evenness}
 lmer.evenness <- lmer(evenness ~ time*treatment+(1|treat.pot) , data = sample_table)
 summary(lmer.evenness)
 
@@ -232,7 +232,7 @@ ggsave(Supplemetary_FigureS4A16S, file= "../04_Figures/Supplemetary_FigureS4A16S
 ```
 
 
-```{r richness}
+```{r model-richness}
 lmer.richness <- lmer(richness ~ time*treatment+(1|treat.pot) , data = sample_table)
 summary(lmer.richness)
 
