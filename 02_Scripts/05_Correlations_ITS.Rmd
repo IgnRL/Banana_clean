@@ -271,10 +271,10 @@ trichoderma_RA <- ggplot(trichoderma_sum,
   theme(legend.position = "none")
 
 trichoderma_RA
-ggsave(trichoderma_RA, file= "../04_Figures/Figure_X_trichoderma.png", width= 1900,height= 1200, units= "px")
+ggsave(trichoderma_RA, file= "../04_Figures/Supplementary_FigureS8C_Trichoderma_RA.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(trichoderma_RA, file = '../03_Analysis_files/Figure_X_trichoderma.rds')
+saveRDS(trichoderma_RA, file = '../03_Analysis_files/Supplementary_plot/Supplementary_FigureS8C_Trichoderma_RA.rds')
 
 
 ```
@@ -340,10 +340,10 @@ trichoderma_plot <- ggplot(cfu_trichoderma_join,
  
   
 trichoderma_plot
-ggsave(trichoderma_plot, file= "../04_Figures/Figure_XB_trichoderma.png", width= 1900,height= 1200, units= "px")
+ggsave(trichoderma_plot, file= "../04_Figures/Supplementary_FigureS8B_Trichoderma_CFU.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(trichoderma_plot, file = '../03_Analysis_files/Figure_XB_trichoderma.rds')
+saveRDS(trichoderma_plot, file = '../03_Analysis_files/Supplementary_plot/Supplementary_FigureS8B_Trichoderma_CFU.rds')
 
 
 ```
