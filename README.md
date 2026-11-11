@@ -24,6 +24,7 @@ The scripts start from the ZOTU count tables and sample metadata and end with th
 - [Figures and tables in the manuscript](#figures-and-tables-in-the-manuscript)
 - [Upstream bioinformatics (not in this repository)](#upstream-bioinformatics-not-in-this-repository)
 - [Citation](#citation)
+- [Funding](#funding)
 - [Contributors and contact](#contributors-and-contact)
 - [License](#license)
 
@@ -225,6 +226,15 @@ If you use this code or data, please cite the article. The full reference and DO
 The experimental design, soil chemistry, plant and CFU data are described in:
 
 > Correa-Delgado R, Bodenhausen N, Romero I, Brito-López P, Jaizme Vega MC, Laich F. Impact of different organic amendments on soil health and banana plant performance. *Journal of Soil Science and Plant Nutrition* (2026). https://doi.org/10.1007/s42729-025-02979-8
+
+---
+
+## Funding
+
+- Consejería de Agricultura, Ganadería, Pesca y Aguas del Gobierno de Canarias: Project CAIA 2023–001-04-S1 "Optimización de la calidad y sostenibilidad de los suelos de platanera en Tenerife mediante el incremento de la actividad y la funcionalidad microbiológica del suelo" and Project CAIA 2024–001-02-S1 "Biodiversidad de microorganismos asociados a plataneras de Canarias: estrategias agroecológicas para el control de *Fusarium oxysporum* f. sp. *cubense* Raza Subtropical 4".
+- Raquel Correa-Delgado's work was funded by CORE Organic 2025/2026 and by COST Action CA22142 "Beneficial root-associated microorganisms for sustainable agriculture", funded by the European Union.
+- Ignacio Romero-Lozano's work was funded by the Root2Res project (EU Horizon Europe no. 101060124 and Swiss State Secretariat for Education, Research and Innovation (SERI) no. 23.00050).
+- Natacha Bodenhausen's work was funded by the Microbiome Theme Coordination at FiBL.
 
 ---
 
