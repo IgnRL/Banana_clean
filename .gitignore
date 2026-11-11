@@ -8,6 +8,9 @@
 # macOS
 .DS_Store
 
+# Manuscript drafts (reference only, not part of the public repository)
+05_word_documents/
+
 # Knitted reports from the R Markdown scripts
 02_Scripts/*.html
 02_Scripts/*_files/
