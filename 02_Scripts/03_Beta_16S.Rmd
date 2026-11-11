@@ -1,5 +1,5 @@
 ---
-title: "03_Beta_16S"
+title: "../03_Beta_16S"
 author: "Ignacio Romero"
 date: "2026-01-15"
 output: html_document
@@ -38,9 +38,9 @@ treat.colors_ok <- c("Control"  = "darkseagreen" , "Chicken\nmanure"= "royalblue
 ## Load data
 
 ```{r}
-zotu97 <- import_qiime("01_Raw_data/p1031_run231218_Revio_16S_ZOTU_c97_Count_Sintax.txt")
+zotu97 <- import_qiime("../01_Raw_data/p1031_run231218_Revio_16S_ZOTU_c97_Count_Sintax.txt")
 
-metadata <- read.csv("01_Raw_data/metadata_2025.csv" ) %>% 
+metadata <- read.csv("../01_Raw_data/metadata_2025.csv" ) %>% 
   column_to_rownames(var= "sample_name")
 metadata$treat.pot <- paste(metadata$treatment, metadata$rep, sep= "_")
 
@@ -155,10 +155,10 @@ p_pca_clr <- ggplot(plot_df_clr, aes(PC1, PC2, color = treatment, shape = time))
 
 p_pca_clr
 
-ggsave(p_pca_clr, file= "04_Figures/Supplemetary_FigureS5_16S.png", width= 1900,height= 1200, units= "px")
+ggsave(p_pca_clr, file= "../04_Figures/Supplemetary_FigureS5_16S.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(p_pca_clr, file = '03_Analysis_files/Supplementary_plot/Supplemetary_FigureS5_16S.rds')
+saveRDS(p_pca_clr, file = '../03_Analysis_files/Supplementary_plot/Supplemetary_FigureS5_16S.rds')
 
 ```
 
@@ -166,7 +166,7 @@ saveRDS(p_pca_clr, file = '03_Analysis_files/Supplementary_plot/Supplemetary_Fig
 
 ```{r}
 #load data
-soil_data<- readxl::read_excel("01_Raw_data/metadata_2025_soil.xlsx")
+soil_data<- readxl::read_excel("../01_Raw_data/metadata_2025_soil.xlsx")
 #normalizada con clr
 otu_clr 
 
@@ -213,7 +213,7 @@ global_test<-anova(rda_step, permutations = 99) # test global del modelo
 axis_test<-anova(rda_step, by = "axis", permutations = 99) # cada eje RDA
 variable_test<-anova(rda_step, by = "terms", permutations = 99) # cada variable ambiental
 RsquareAdj(rda_step)
-rda_alldata <- readRDS("03_Analysis_files/Figure_2_16S.rds")
+rda_alldata <- readRDS("../03_Analysis_files/Figure_2_16S.rds")
 
 ####para grafico######
 # Extraer el valor F y el p del test global
@@ -230,7 +230,7 @@ subtitle_text <- paste0(
 treat <- soil_data$treatment
 time  <- soil_data$time
 identical(soil_data$sample_id, rownames(otu_clr))
-rda_alldata <- readRDS("03_Analysis_files/Figure_2_16S.rds")
+rda_alldata <- readRDS("../03_Analysis_files/Figure_2_16S.rds")
 # Extraer scores (sitios y flechas) con el mismo 'scaling'
 scal <- 2
 sc <- scores(rda_step, display = c("sites","bp"), scaling = scal)
@@ -323,10 +323,10 @@ rda_alldata <- ggplot(sites, aes(x = RDA1, y = RDA2,
     legend.key.size = unit(0.5, "cm")
   )
 
-ggsave(rda_alldata, file= "04_Figures/Figure_2_16S_leyenda.png", width= 2200,height= 1800, units= "px")
-ggsave(p, file= "04_Figures/Figure_2_16S_leyenda.png", width= 2200,height= 1800, units= "px")
+ggsave(rda_alldata, file= "../04_Figures/Figure_2_16S_leyenda.png", width= 2200,height= 1800, units= "px")
+ggsave(p, file= "../04_Figures/Figure_2_16S_leyenda.png", width= 2200,height= 1800, units= "px")
 
-saveRDS(rda_alldata, file = '03_Analysis_files/Figure_2_16S.rds')
+saveRDS(rda_alldata, file = '../03_Analysis_files/Figure_2_16S.rds')
 
 
 ```
@@ -336,7 +336,7 @@ saveRDS(rda_alldata, file = '03_Analysis_files/Figure_2_16S.rds')
 ```{r}
 
 #load data
-plant_data<- readxl::read_excel("01_Raw_data/plant_data.xlsx")
+plant_data<- readxl::read_excel("../01_Raw_data/plant_data.xlsx")
 
 meta <- as(sample_data(zotu_filt), "data.frame")
 meta$sample_id <- rownames(meta)
@@ -436,10 +436,10 @@ rda_alldata_plant <- ggplot(sites_plant, aes(x = RDA1, y = RDA2,
   )
 
 rda_alldata_plant
-ggsave(rda_alldata_plant, file= "04_Figures/Supplemetary_FigureS6_16S.png", width= 2200,height= 1800, units= "px")
+ggsave(rda_alldata_plant, file= "../04_Figures/Supplemetary_FigureS6_16S.png", width= 2200,height= 1800, units= "px")
 
 
-saveRDS(rda_alldata_plant, file = '03_Analysis_files//Supplementary_plot/Supplemetary_FigureS6_16S.rds')
+saveRDS(rda_alldata_plant, file = '../03_Analysis_files//Supplementary_plot/Supplemetary_FigureS6_16S.rds')
 
 
 ```

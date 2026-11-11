@@ -22,22 +22,22 @@ library(Biostrings)
 ```{r}
 
 #Phyloseq object
-zotu97 <- import_qiime("ITS_banana/p1031_run231023_ITS_ccs_ZOTU_c97_Count_Sintax.txt")
+zotu97 <- import_qiime("../p1031_run231023_ITS_ccs_ZOTU_c97_Count_Sintax.txt")
 original <- zotu97
 
 #Metadata
-metadata <- read.csv("raw_data/metadata_2025.csv" ) %>% 
+metadata <- read.csv("../metadata_2025.csv" ) %>% 
   column_to_rownames(var= "sample_name")
 metadata$pot <-interaction(metadata$treatment, metadata$rep, sep= "_")
 
 zotu97 <- merge_phyloseq(zotu97, sample_data(metadata))
 
 #Fasta file
-fasta_file <- "ITS_banana/p1031_run231023_ITS_ccs_ZOTU_c97.fa"
+fasta_file <- "../p1031_run231023_ITS_ccs_ZOTU_c97.fa"
 seqs <- readDNAStringSet(fasta_file)
 
 #UNITE database
-unite_ref <- "dada2_trial/sh_general_release_dynamic_19.02.2025.fasta"
+unite_ref <- "sh_general_release_dynamic_19.02.2025.fasta"
 
 
 ```
@@ -50,7 +50,7 @@ set.seed(5070)
 tax_assign <- assignTaxonomy(seqs, refFasta = unite_ref,
                              multithread = TRUE, tryRC = TRUE, minBoot = 50)
 rownames(tax_assign) <- names(seqs)
-saveRDS(tax_assign, file= "dada2_trial/taxonomy_ITS_dada2.RDa")
+saveRDS(tax_assign, file= "taxonomy_ITS_dada2.RDa")
 
 
 ```

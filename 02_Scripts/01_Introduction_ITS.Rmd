@@ -1,5 +1,5 @@
 ---
-title: "01_Introduction_ITS"
+title: "../01_Introduction_ITS"
 author: "Ignacio Romero"
 date: "2026-01-14"
 output: html_document
@@ -40,11 +40,11 @@ treat.colors_ok <- c("Control"  = "darkseagreen" , "Chicken\nmanure"= "royalblue
 
 ```{r}
 zotu97 <- import_qiime(
-  "01_Raw_data/p1031_run231023_ITS_ccs_ZOTU_c97_Count_Sintax.txt"
+  "../01_Raw_data/p1031_run231023_ITS_ccs_ZOTU_c97_Count_Sintax.txt"
 )
 
 metadata <- read.csv(
-  "01_Raw_data/metadata_2025.csv") %>%
+  "../01_Raw_data/metadata_2025.csv") %>%
   column_to_rownames(var = "sample_name")
 
 zotu97 <- merge_phyloseq(zotu97, sample_data(metadata))
@@ -141,11 +141,11 @@ p_depth <- ggplot(df_depth, aes(x = rep, y = seq.depth, fill = treatment)) +
 
 p_depth
 
-ggsave(p_depth, file= "04_Figures/SupplementaryFigure1_ITS.png", width= 1900,height= 1200, units= "px")
+ggsave(p_depth, file= "../04_Figures/SupplementaryFigure1_ITS.png", width= 1900,height= 1200, units= "px")
 
 
 
-saveRDS(p_depth, file = '03_Analysis_files/Supplementary_plot/Supplementary1_ITS.rds')
+saveRDS(p_depth, file = '../03_Analysis_files/Supplementary_plot/Supplementary1_ITS.rds')
 ```
 
 
@@ -174,10 +174,10 @@ rarefaction_treatment <- rarecurve_meta %>% ggplot(aes(Reads, Species, col= trea
        y= "ITS Number of OTUs",
        col= "Treatment")
 
-ggsave(rarefaction_treatment, file= "04_Figures/SupplementaryFigure2_ITS.png", width= 1900,height= 1200, units= "px")
+ggsave(rarefaction_treatment, file= "../04_Figures/SupplementaryFigure2_ITS.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(rarefaction_treatment, file = '03_Analysis_files/Supplementary_plot/Supplementary2_ITS.rds')
+saveRDS(rarefaction_treatment, file = '../03_Analysis_files/Supplementary_plot/Supplementary2_ITS.rds')
 ```
 
 ## Taxonomy
@@ -283,9 +283,9 @@ p_phyla2 <- ggplot(agg2, aes(x = 1, y = Abundance, fill = Taxonomy)) +
   guides(fill = guide_legend("Taxonomy", nrow = 2, byrow = TRUE))
 
 p_phyla2
-ggsave(p_phyla2, file= "04_Figures/SupplementaryFigure3_ITS_leyenda.png", width= 1900,height= 1200, units= "px")
+ggsave(p_phyla2, file= "../04_Figures/SupplementaryFigure3_ITS_leyenda.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(p_phyla2, file = '03_Analysis_files/Supplementary_plot/Supplementary3_ITS.rds')
+saveRDS(p_phyla2, file = '../03_Analysis_files/Supplementary_plot/Supplementary3_ITS.rds')
 ```
 

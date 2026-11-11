@@ -27,7 +27,8 @@ library(stringr)
 library(flextable)
 library(officer)
 
-if (basename(getwd()) == "02_Scripts") setwd("..")
+# Paths are relative to the 02_Scripts/ folder; works from the project root too.
+if (basename(getwd()) != "02_Scripts" && dir.exists("02_Scripts")) setwd("02_Scripts")
 
 # ---- Settings ---------------------------------------------------------------
 # TRUE  = only OTUs selected by BOTH methods in that treatment (as in the dot plots)
@@ -38,7 +39,7 @@ only_both_methods <- TRUE
 ancombc_is_natural_log <- TRUE
 
 treat_order <- c("chicken", "cow", "compost", "pellet")
-out_dir     <- "04_Tables"
+out_dir     <- "../04_Tables"
 dir.create(out_dir, showWarnings = FALSE)
 
 # ---- Helpers ----------------------------------------------------------------
@@ -49,7 +50,7 @@ is_sel  <- function(x) !is.na(x) & x != "no"      # "no" / NA = not selected
 
 # ---- Build the table for one dataset ----------------------------------------
 build_table <- function(tag) {
-  merged <- readRDS(sprintf("03_Analysis_files/DAA_%s_merged_long.rds", tag))
+  merged <- readRDS(sprintf("../03_Analysis_files/DAA_%s_merged_long.rds", tag))
 
   # the DAA columns are repeated on every sample: collapse to OTU x treatment
   daa <- merged %>%
