@@ -1,5 +1,5 @@
 ---
-title: "05_Correlations_16"
+title: "../05_Correlations_16"
 author: "raquel"
 date: "2026-01-19"
 output: html_document
@@ -39,9 +39,9 @@ treat.colors_ok <- c("Control"  = "darkseagreen" , "Chicken\nmanure"= "royalblue
 ## Load data
 
 ```{r}
-zotu97 <- import_qiime("01_Raw_data/p1031_run231023_ITS_ccs_ZOTU_c97_Count_Sintax.txt")
+zotu97 <- import_qiime("../01_Raw_data/p1031_run231023_ITS_ccs_ZOTU_c97_Count_Sintax.txt")
 
-metadata <- read.csv("01_Raw_data/metadata_2025.csv" ) %>% 
+metadata <- read.csv("../01_Raw_data/metadata_2025.csv" ) %>% 
   column_to_rownames(var= "sample_name")
 metadata$treat.pot <- paste(metadata$treatment, metadata$rep, sep= "_")
 
@@ -84,7 +84,7 @@ zotu_tss_pct <- transform_sample_counts(
 ## Filamentous fungi
 
 ```{r fungi}
-cfu_fungi<-readxl::read_excel("01_Raw_data/cfu_fungi.xlsx")
+cfu_fungi<-readxl::read_excel("../01_Raw_data/cfu_fungi.xlsx")
 phy_phylum <- tax_glom(zotu_tss_pct, taxrank = "Phylum")
 
 fungi_phy <- subset_taxa(
@@ -158,17 +158,17 @@ fungi_plot <- ggplot(cfu_fungi_join,
 fungi_plot
 
 
-ggsave(fungi_plot, file= "04_Figures/Figure_4B_Fungi.png", width= 1900,height= 1200, units= "px")
+ggsave(fungi_plot, file= "../04_Figures/Figure_4B_Fungi.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(fungi_plot, file = '03_Analysis_files/Figure_4B_Fungi.rds')
+saveRDS(fungi_plot, file = '../03_Analysis_files/Figure_4B_Fungi.rds')
 ```
 
 ## Trichoderma
 
 ```{r trichoderma ra}
-tax_dada2 <- readRDS("01_Raw_Data/dada2_trial/taxonomy_ITS_dada2.RDa")
-zotu97 <- import_qiime("01_Raw_Data/p1031_run231023_ITS_ccs_ZOTU_c97_Count_Sintax.txt")
+tax_dada2 <- readRDS("../01_Raw_data/dada2_trial/taxonomy_ITS_dada2.RDa")
+zotu97 <- import_qiime("../01_Raw_data/p1031_run231023_ITS_ccs_ZOTU_c97_Count_Sintax.txt")
 
 
 zotu97 <- merge_phyloseq(zotu97, sample_data(metadata))
@@ -271,10 +271,10 @@ trichoderma_RA <- ggplot(trichoderma_sum,
   theme(legend.position = "none")
 
 trichoderma_RA
-ggsave(trichoderma_RA, file= "04_Figures/Figure_X_trichoderma.png", width= 1900,height= 1200, units= "px")
+ggsave(trichoderma_RA, file= "../04_Figures/Figure_X_trichoderma.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(trichoderma_RA, file = '03_Analysis_files/Figure_X_trichoderma.rds')
+saveRDS(trichoderma_RA, file = '../03_Analysis_files/Figure_X_trichoderma.rds')
 
 
 ```
@@ -282,7 +282,7 @@ saveRDS(trichoderma_RA, file = '03_Analysis_files/Figure_X_trichoderma.rds')
 ## Correlation
 
 ```{r}
-cfu_trichoderma<-readxl::read_excel("01_Raw_Data/cfu_trichoderma.xlsx")
+cfu_trichoderma<-readxl::read_excel("../01_Raw_data/cfu_trichoderma.xlsx")
 
 physeq_trichoderma
 trichoderma_relativa_total
@@ -340,10 +340,10 @@ trichoderma_plot <- ggplot(cfu_trichoderma_join,
  
   
 trichoderma_plot
-ggsave(trichoderma_plot, file= "04_Figures/Figure_XB_trichoderma.png", width= 1900,height= 1200, units= "px")
+ggsave(trichoderma_plot, file= "../04_Figures/Figure_XB_trichoderma.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(trichoderma_plot, file = '03_Analysis_files/Figure_XB_trichoderma.rds')
+saveRDS(trichoderma_plot, file = '../03_Analysis_files/Figure_XB_trichoderma.rds')
 
 
 ```

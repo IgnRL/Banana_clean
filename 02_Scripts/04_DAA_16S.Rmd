@@ -1,5 +1,5 @@
 ---
-title: "04_DAA_16S"
+title: "../04_DAA_16S"
 author: "Ignacio Romero"
 date: "2026-01-15"
 output: html_document
@@ -41,16 +41,16 @@ treat.colors_ok <- c("Control"  = "darkseagreen" , "Chicken\nmanure"= "royalblue
 ## Load data
 
 ```{r}
-zotu97 <- import_qiime("01_Raw_data/p1031_run231218_Revio_16S_ZOTU_c97_Count_Sintax.txt")
+zotu97 <- import_qiime("../01_Raw_data/p1031_run231218_Revio_16S_ZOTU_c97_Count_Sintax.txt")
 
-metadata <- read.csv("01_Raw_data/metadata_2025.csv" ) %>% 
+metadata <- read.csv("../01_Raw_data/metadata_2025.csv" ) %>% 
   column_to_rownames(var= "sample_name")
 metadata$treat.pot <- paste(metadata$treatment, metadata$rep, sep= "_")
 
 zotu97 <- merge_phyloseq(zotu97, sample_data(metadata))
 
 
-taxonomy_16S_dada2 <- readRDS("03_Analysis_files/taxonomy_16S_dada2.RDa")
+taxonomy_16S_dada2 <- readRDS("../03_Analysis_files/taxonomy_16S_dada2.RDa")
 
 tax_table(zotu97) <- tax_table(taxonomy_16S_dada2)
 ```
@@ -110,7 +110,7 @@ res_chicken<- lfcShrink(
 # Sign: the coefficient is "chicken vs control", so a POSITIVE log2FoldChange = enriched in CHICKEN.
 res_chicken$treatment <- "chicken"
 attr(res_chicken, "lfc_direction") <- "amendment_vs_control"   # tag read by 04b_DAA_16S_merged_dotplot.R
-saveRDS(res_chicken, file = "03_Analysis_files/deseq_chicken_bact.RDa")
+saveRDS(res_chicken, file = "../03_Analysis_files/deseq_chicken_bact.RDa")
 ```
 
 ### Cow
@@ -134,7 +134,7 @@ res_cow<- lfcShrink(
 # Sign: the coefficient is "cow vs control", so a POSITIVE log2FoldChange = enriched in COW.
 res_cow$treatment <- "cow"
 attr(res_cow, "lfc_direction") <- "amendment_vs_control"   # tag read by 04b_DAA_16S_merged_dotplot.R
-saveRDS(res_cow, file = "03_Analysis_files/deseq_cow_bact.RDa")
+saveRDS(res_cow, file = "../03_Analysis_files/deseq_cow_bact.RDa")
 ```
 
 ### Compost
@@ -158,7 +158,7 @@ res_compost<- lfcShrink(
 # Sign: the coefficient is "compost vs control", so a POSITIVE log2FoldChange = enriched in COMPOST.
 res_compost$treatment <- "compost"
 attr(res_compost, "lfc_direction") <- "amendment_vs_control"   # tag read by 04b_DAA_16S_merged_dotplot.R
-saveRDS(res_compost, file = "03_Analysis_files/deseq_compost_bact.RDa")
+saveRDS(res_compost, file = "../03_Analysis_files/deseq_compost_bact.RDa")
 ```
 
 ### Pellet
@@ -183,7 +183,7 @@ res_pellet<- lfcShrink(
 # Sign: the coefficient is "pellet vs control", so a POSITIVE log2FoldChange = enriched in PELLET.
 res_pellet$treatment <- "pellet"
 attr(res_pellet, "lfc_direction") <- "amendment_vs_control"   # tag read by 04b_DAA_16S_merged_dotplot.R
-saveRDS(res_pellet, file = "03_Analysis_files/deseq_pellet_bact.RDa")
+saveRDS(res_pellet, file = "../03_Analysis_files/deseq_pellet_bact.RDa")
 
 
 ```
@@ -236,12 +236,12 @@ volcano_plot_deseq <- res_all_bact_deseq %>%
 
 volcano_plot_deseq
 
-ggsave(volcano_plot_deseq, file= "04_Figures/FigureX_16S.png", width= 1900,height= 1200, units= "px")
+ggsave(volcano_plot_deseq, file= "../04_Figures/FigureX_16S.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(volcano_plot_deseq, file = '03_Analysis_files/FigureX_16S.RDa')
+saveRDS(volcano_plot_deseq, file = '../03_Analysis_files/FigureX_16S.RDa')
 
-plot_deseq <- readRDS("03_Analysis_files/FigureX_16S.RDa")
+plot_deseq <- readRDS("../03_Analysis_files/FigureX_16S.RDa")
 
 plot_deseq$data$treatment <- factor(
   plot_deseq$data$treatment,
@@ -258,7 +258,7 @@ plot_deseq
 
 
 plot
-ggsave(plot_deseq, file= "04_Figures/FigureX_16S_revisado_2_deseq.png", width= 1900,height= 1200, units= "px")
+ggsave(plot_deseq, file= "../04_Figures/FigureX_16S_revisado_2_deseq.png", width= 1900,height= 1200, units= "px")
 ```
 
 ## ANCOMBC
@@ -287,7 +287,7 @@ ancombc2_chicken <- data.frame(
   p_adj = ancombc2_chicken$q_treatmentcontrol)
 ancombc2_chicken$treatment <- "chicken"
 attr(ancombc2_chicken, "lfc_direction") <- "amendment_vs_control"   # tag read by 04b_DAA_16S_merged_dotplot.R
-saveRDS(ancombc2_chicken, file= "03_Analysis_files/ancombc_chicken_bact.RDa")
+saveRDS(ancombc2_chicken, file= "../03_Analysis_files/ancombc_chicken_bact.RDa")
 ```
 
 ```{r ancombc cow}
@@ -312,7 +312,7 @@ ancombc2_cow$treatment <- "cow"
 
 
 attr(ancombc2_cow, "lfc_direction") <- "amendment_vs_control"   # tag read by 04b_DAA_16S_merged_dotplot.R
-saveRDS(ancombc2_cow, file= "03_Analysis_files/ancombc_cow_bact.RDa")
+saveRDS(ancombc2_cow, file= "../03_Analysis_files/ancombc_cow_bact.RDa")
 ```
 
 ```{r ancomb compost}
@@ -338,7 +338,7 @@ ancombc2_compost <- data.frame(
 ancombc2_compost$treatment <- "compost"
 
 attr(ancombc2_compost, "lfc_direction") <- "amendment_vs_control"   # tag read by 04b_DAA_16S_merged_dotplot.R
-saveRDS(ancombc2_compost, file= "03_Analysis_files/ancombc_compost_bact.RDa")
+saveRDS(ancombc2_compost, file= "../03_Analysis_files/ancombc_compost_bact.RDa")
 
 ```
 
@@ -365,12 +365,12 @@ ancombc2_pellet <- data.frame(
 ancombc2_pellet$treatment <- "pellet"
 
 attr(ancombc2_pellet, "lfc_direction") <- "amendment_vs_control"   # tag read by 04b_DAA_16S_merged_dotplot.R
-saveRDS(ancombc2_pellet, file= "03_Analysis_files/ancombc_pellet_bact.RDa")
+saveRDS(ancombc2_pellet, file= "../03_Analysis_files/ancombc_pellet_bact.RDa")
 
-pellet<-readRDS("03_Analysis_files/ancombc_pellet_bact.RDa")
-cow<-readRDS("03_Analysis_files/ancombc_cow_bact.RDa")
-compost<-readRDS("03_Analysis_files/ancombc_compost_bact.RDa")
-chicken<-readRDS("03_Analysis_files/ancombc_chicken_bact.RDa")
+pellet<-readRDS("../03_Analysis_files/ancombc_pellet_bact.RDa")
+cow<-readRDS("../03_Analysis_files/ancombc_cow_bact.RDa")
+compost<-readRDS("../03_Analysis_files/ancombc_compost_bact.RDa")
+chicken<-readRDS("../03_Analysis_files/ancombc_chicken_bact.RDa")
 ```
 
 ```{r ancombc fix direction}
@@ -380,7 +380,7 @@ chicken<-readRDS("03_Analysis_files/ancombc_chicken_bact.RDa")
 # four files get the tag "amendment_vs_control". Files that already carry the tag
 # are left alone, so this chunk is safe to run more than once.
 for (n in c("chicken", "cow", "compost", "pellet")) {
-  f <- sprintf("03_Analysis_files/ancombc_%s_bact.RDa", n)
+  f <- sprintf("../03_Analysis_files/ancombc_%s_bact.RDa", n)
   x <- readRDS(f)
   if (!identical(attr(x, "lfc_direction"), "amendment_vs_control")) {
     if (n %in% c("chicken", "compost")) x$lfc <- -x$lfc
@@ -389,10 +389,10 @@ for (n in c("chicken", "cow", "compost", "pellet")) {
   }
 }
 
-pellet  <- readRDS("03_Analysis_files/ancombc_pellet_bact.RDa")
-cow     <- readRDS("03_Analysis_files/ancombc_cow_bact.RDa")
-compost <- readRDS("03_Analysis_files/ancombc_compost_bact.RDa")
-chicken <- readRDS("03_Analysis_files/ancombc_chicken_bact.RDa")
+pellet  <- readRDS("../03_Analysis_files/ancombc_pellet_bact.RDa")
+cow     <- readRDS("../03_Analysis_files/ancombc_cow_bact.RDa")
+compost <- readRDS("../03_Analysis_files/ancombc_compost_bact.RDa")
+chicken <- readRDS("../03_Analysis_files/ancombc_chicken_bact.RDa")
 ```
 
 
@@ -433,12 +433,12 @@ volcano_plot_ancombc_16S <- res_all_bact_ancombc %>%
 
 volcano_plot_ancombc_16S
 
-ggsave(volcano_plot_ancombc_16S, file= "04_Figures/FigureXX_16S.png", width= 1900,height= 1200, units= "px")
+ggsave(volcano_plot_ancombc_16S, file= "../04_Figures/FigureXX_16S.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(volcano_plot_ancombc_16S, file = '03_Analysis_files/FigureXX_16S.RDa')
+saveRDS(volcano_plot_ancombc_16S, file = '../03_Analysis_files/FigureXX_16S.RDa')
 
-plot2 <- readRDS("03_Analysis_files/FigureXX_16S.RDa")
+plot2 <- readRDS("../03_Analysis_files/FigureXX_16S.RDa")
 
 plot2$data$treatment <- factor(
   p$data$treatment,
@@ -455,7 +455,7 @@ plot
 
 ###editar grafico 
 
-ancom_16s <- readRDS("03_Analysis_files/FigureXX_16S.RDa")
+ancom_16s <- readRDS("../03_Analysis_files/FigureXX_16S.RDa")
 
 ancom_16s$data$treatment <- factor(
   ancom_16s$data$treatment,
@@ -470,5 +470,5 @@ ancom_16s <- ancom_16s +
 
 ancom_16s
 
-ggsave(ancom_16s, file= "04_Figures/FigureXX_16S_revisado_2_ancom.png", width= 1900,height= 1200, units= "px")
+ggsave(ancom_16s, file= "../04_Figures/FigureXX_16S_revisado_2_ancom.png", width= 1900,height= 1200, units= "px")
 ```

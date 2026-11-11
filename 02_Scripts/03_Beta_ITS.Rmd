@@ -1,5 +1,5 @@
 ---
-title: "03_Beta_16S"
+title: "../03_Beta_16S"
 author: "Ignacio Romero"
 date: "2026-01-15"
 output: html_document
@@ -37,9 +37,9 @@ treat.colors_ok <- c("Control"  = "darkseagreen" , "Chicken\nmanure"= "royalblue
 ## Load data
 
 ```{r}
-zotu97 <- import_qiime("01_Raw_data/p1031_run231023_ITS_ccs_ZOTU_c97_Count_Sintax.txt")
+zotu97 <- import_qiime("../01_Raw_data/p1031_run231023_ITS_ccs_ZOTU_c97_Count_Sintax.txt")
 
-metadata <- read.csv("01_Raw_data/metadata_2025.csv" ) %>% 
+metadata <- read.csv("../01_Raw_data/metadata_2025.csv" ) %>% 
   column_to_rownames(var= "sample_name")
 metadata$treat.pot <- paste(metadata$treatment, metadata$rep, sep= "_")
 
@@ -157,10 +157,10 @@ theme(text = element_text(size = 12))
 
 p_pca_clr
 
-ggsave(p_pca_clr, file= "04_Figures/Supplemetary_FigureS5_ITS.png", width= 1900,height= 1200, units= "px")
+ggsave(p_pca_clr, file= "../04_Figures/Supplemetary_FigureS5_ITS.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(p_pca_clr, file = '03_Analysis_files/Supplementary_plot/Supplemetary_FigureS5_ITS.rds')
+saveRDS(p_pca_clr, file = '../03_Analysis_files/Supplementary_plot/Supplemetary_FigureS5_ITS.rds')
 
 ```
 
@@ -168,7 +168,7 @@ saveRDS(p_pca_clr, file = '03_Analysis_files/Supplementary_plot/Supplemetary_Fig
 
 ```{r}
 #load data
-soil_data<- readxl::read_excel("01_Raw_data/metadata_2025_soil.xlsx")
+soil_data<- readxl::read_excel("../01_Raw_data/metadata_2025_soil.xlsx")
 #normalizada con clr
 otu_clr 
 
@@ -300,10 +300,10 @@ rda_alldata <- ggplot(sites, aes(x = RDA1, y = RDA2,
 
 
 rda_alldata
-ggsave(rda_alldata, file= "04_Figures/Figure_2_ITS.png", width= 2200,height= 1800, units= "px")
+ggsave(rda_alldata, file= "../04_Figures/Figure_2_ITS.png", width= 2200,height= 1800, units= "px")
 
 
-saveRDS(rda_alldata, file = '03_Analysis_files/Figure_2_ITS.rds')
+saveRDS(rda_alldata, file = '../03_Analysis_files/Figure_2_ITS.rds')
 
 
 p<-Figure_2_ITS
@@ -318,7 +318,7 @@ p <- p +
     axis.text  = element_text(size = 14)   # números del eje
   )
 p
-ggsave(p, file= "04_Figures/Figure_2_ITS_1.png", width= 2200,height= 1800, units= "px")
+ggsave(p, file= "../04_Figures/Figure_2_ITS_1.png", width= 2200,height= 1800, units= "px")
 
 ```
 
@@ -327,7 +327,7 @@ ggsave(p, file= "04_Figures/Figure_2_ITS_1.png", width= 2200,height= 1800, units
 ```{r}
 
 #load data
-plant_data<- readxl::read_excel("01_Raw_data/plant_data.xlsx")
+plant_data<- readxl::read_excel("../01_Raw_data/plant_data.xlsx")
 
 meta <- as(sample_data(zotu_filt), "data.frame")
 meta$sample_id <- rownames(meta)
@@ -429,10 +429,10 @@ rda_alldata_plant <- ggplot(sites_plant, aes(x = RDA1, y = RDA2,
   )
 
 rda_alldata_plant
-ggsave(rda_alldata_plant, file= "04_Figures/Supplemetary_FigureS6_ITS.png", width= 2200,height= 1800, units= "px")
+ggsave(rda_alldata_plant, file= "../04_Figures/Supplemetary_FigureS6_ITS.png", width= 2200,height= 1800, units= "px")
 
 
-saveRDS(rda_alldata_plant, file = '03_Analysis_files//Supplementary_plot/Supplemetary_FigureS6_ITS.rds')
+saveRDS(rda_alldata_plant, file = '../03_Analysis_files//Supplementary_plot/Supplemetary_FigureS6_ITS.rds')
 
 
 ```

@@ -41,9 +41,9 @@ treat.colors_ok <- c("Control"  = "darkseagreen" , "Chicken\nmanure"= "royalblue
 ## Load data
 
 ```{r}
-zotu97 <- import_qiime("01_Raw_data/p1031_run231218_Revio_16S_ZOTU_c97_Count_Sintax.txt")
+zotu97 <- import_qiime("../01_Raw_data/p1031_run231218_Revio_16S_ZOTU_c97_Count_Sintax.txt")
 
-metadata <- read.csv("01_Raw_data/metadata_2025.csv" ) %>% 
+metadata <- read.csv("../01_Raw_data/metadata_2025.csv" ) %>% 
   column_to_rownames(var= "sample_name")
 metadata$treat.pot <- paste(metadata$treatment, metadata$rep, sep= "_")
 
@@ -173,13 +173,13 @@ shannon_treat_facet <- sample_table %>% ggplot(aes(x= time, y= shannon, color= t
   
 shannon_treat_facet
 
-ggsave(shannon_treat_facet, file= "04_Figures/Supplemetary_FigureS4B16S.png", width= 1900,height= 1200, units= "px")
+ggsave(shannon_treat_facet, file= "../04_Figures/Supplemetary_FigureS4B16S.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(shannon_treat_facet, file = '03_Analysis_files/Supplementary_plot/Supplemetary_FigureS4B16S.rds')
+saveRDS(shannon_treat_facet, file = '../03_Analysis_files/Supplementary_plot/Supplemetary_FigureS4B16S.rds')
 
 Supplemetary_FigureS4B16S
-ggsave(Supplemetary_FigureS4B16S, file= "04_Figures/Supplemetary_FigureS4B16S.png", width= 1900,height= 1200, units= "px")
+ggsave(Supplemetary_FigureS4B16S, file= "../04_Figures/Supplemetary_FigureS4B16S.png", width= 1900,height= 1200, units= "px")
 ```
 
 ```{r evenness}
@@ -221,13 +221,13 @@ evenness_treat_facet <- sample_table %>% ggplot(aes(x= time, y= evenness, color=
   
 evenness_treat_facet
 
-ggsave(evenness_treat_facet, file= "04_Figures/Supplemetary_FigureS4A16S.png", width= 1900,height= 1200, units= "px")
+ggsave(evenness_treat_facet, file= "../04_Figures/Supplemetary_FigureS4A16S.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(evenness_treat_facet, file = '03_Analysis_files/Supplementary_plot/Supplemetary_FigureS4A16S.rds')
+saveRDS(evenness_treat_facet, file = '../03_Analysis_files/Supplementary_plot/Supplemetary_FigureS4A16S.rds')
 
 Supplemetary_FigureS4A16S
-ggsave(Supplemetary_FigureS4A16S, file= "04_Figures/Supplemetary_FigureS4A16S.png", width= 1900,height= 1200, units= "px")
+ggsave(Supplemetary_FigureS4A16S, file= "../04_Figures/Supplemetary_FigureS4A16S.png", width= 1900,height= 1200, units= "px")
 
 ```
 
@@ -271,13 +271,13 @@ richness_treat_facet <- sample_table %>% ggplot(aes(x= time, y= richness, color=
   
 richness_treat_facet
 
-ggsave(richness_treat_facet, file= "04_Figures/Figure_1_16S.png", width= 1900,height= 1200, units= "px")
+ggsave(richness_treat_facet, file= "../04_Figures/Figure_1_16S.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(richness_treat_facet, file = '03_Analysis_files/Figure_1_16S.rds')
+saveRDS(richness_treat_facet, file = '../03_Analysis_files/Figure_1_16S.rds')
 
 Figure_1_16S
-ggsave(Figure_1_16S, file= "04_Figures/Figure_1_16S.png", width= 1900,height= 1200, units= "px")
+ggsave(Figure_1_16S, file= "../04_Figures/Figure_1_16S.png", width= 1900,height= 1200, units= "px")
 
 
 ```

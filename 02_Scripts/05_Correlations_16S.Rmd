@@ -1,5 +1,5 @@
 ---
-title: "05_Correlations_16"
+title: "../05_Correlations_16"
 author: "raquel"
 date: "2026-01-19"
 output: html_document
@@ -38,9 +38,9 @@ treat.colors_ok <- c("Control"  = "darkseagreen" , "Chicken\nmanure"= "royalblue
 ## Load data
 
 ```{r}
-zotu97 <- import_qiime("01_Raw_data/p1031_run231218_Revio_16S_ZOTU_c97_Count_Sintax.txt")
+zotu97 <- import_qiime("../01_Raw_data/p1031_run231218_Revio_16S_ZOTU_c97_Count_Sintax.txt")
 
-metadata <- read.csv("01_Raw_data/metadata_2025.csv" ) %>% 
+metadata <- read.csv("../01_Raw_data/metadata_2025.csv" ) %>% 
   column_to_rownames(var= "sample_name")
 metadata$treat.pot <- paste(metadata$treatment, metadata$rep, sep= "_")
 
@@ -83,7 +83,7 @@ zotu_tss_pct <- transform_sample_counts(
 ## Actinobacteria
 
 ```{r actinobacteria}
-cfu_actinobacteria<-readxl::read_excel("01_Raw_data/cfu_actinobacteria.xlsx")
+cfu_actinobacteria<-readxl::read_excel("../01_Raw_data/cfu_actinobacteria.xlsx")
 phy_phylum <- tax_glom(zotu_tss_pct, taxrank = "Phylum")
 
 actino_phy <- subset_taxa(
@@ -156,16 +156,16 @@ actinobacteria_plot <- ggplot(cfu_actino_join,
 actinobacteria_plot
 
 
-ggsave(actinobacteria_plot, file= "04_Figures/Supplemetary_FigureS7_Actinobacteria.png", width= 1900,height= 1200, units= "px")
+ggsave(actinobacteria_plot, file= "../04_Figures/Supplemetary_FigureS7_Actinobacteria.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(actinobacteria_plot, file = '03_Analysis_files/Supplementary_plot/Supplemetary_FigureS7_Actinobacteria.rds')
+saveRDS(actinobacteria_plot, file = '../03_Analysis_files/Supplementary_plot/Supplemetary_FigureS7_Actinobacteria.rds')
 ```
 
 ## Bacteria
 
 ```{r}
-bacteria<-readxl::read_excel("01_Raw_data/cfu_bacteria.xlsx")
+bacteria<-readxl::read_excel("../01_Raw_data/cfu_bacteria.xlsx")
 
 unique(tax_table(zotu_tss_pct)[, "Phylum"])
 
@@ -244,10 +244,10 @@ bacteria_plot <- ggplot(cfu_bacteria_join,
            size = 4)
 
 bacteria_plot
-ggsave(bacteria_plot, file= "04_Figures/Figure_4_Bacteria.png", width= 1900,height= 1200, units= "px")
+ggsave(bacteria_plot, file= "../04_Figures/Figure_4_Bacteria.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(bacteria_plot, file = '03_Analysis_files/Figure_4_Bacteria.rds')
+saveRDS(bacteria_plot, file = '../03_Analysis_files/Figure_4_Bacteria.rds')
 
 ```
 

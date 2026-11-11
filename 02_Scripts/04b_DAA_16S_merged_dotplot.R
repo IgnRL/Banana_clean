@@ -56,10 +56,11 @@
 
 
 # ---- 0. Working directory ---------------------------------------------------
-# The Rmd uses paths relative to the project root, so make sure we are there.
-if (basename(getwd()) == "02_Scripts") setwd("..")
-stopifnot("Run this script from the project root (Banana_clean/)" =
-            file.exists("02_Scripts/04_DAA_16S.Rmd"))
+# All paths are relative to the 02_Scripts/ folder (like the Rmd files), so make
+# sure we are there. Works when run from the project root or from 02_Scripts/.
+if (basename(getwd()) != "02_Scripts" && dir.exists("02_Scripts")) setwd("02_Scripts")
+stopifnot("Run this script from 02_Scripts/ or from the project root" =
+            file.exists("04_DAA_16S.Rmd"))
 
 
 # ---- 1. Helper: run selected chunks of an Rmd --------------------------------
@@ -154,9 +155,9 @@ phylum_colours <- c(
 # lists which phyla used a fallback.
 fallback_colours <- c("#F9E77F", "#C9B79C", "#7F7F7F")
 
-out_png  <- "04_Figures/DAA_16S_family_dotplot.png"
-out_plot <- "03_Analysis_files/DAA_16S_family_dotplot.rds"
-out_data <- "03_Analysis_files/DAA_16S_family_dotplot_data.csv"
+out_png  <- "../04_Figures/DAA_16S_family_dotplot.png"
+out_plot <- "../03_Analysis_files/DAA_16S_family_dotplot.rds"
+out_data <- "../03_Analysis_files/DAA_16S_family_dotplot_data.csv"
 
 
 # ---- 3. Load the saved DAA results -------------------------------------------
@@ -167,22 +168,22 @@ out_data <- "03_Analysis_files/DAA_16S_family_dotplot_data.csv"
 # The objects are given the names the Rmd uses (res_chicken, ... and chicken, ...)
 # because the "deseq bind" and "ancombc bind" chunks that we run below need them.
 amendments  <- c("chicken", "cow", "compost", "pellet")
-saved_files <- c(sprintf("03_Analysis_files/deseq_%s_bact.RDa",   amendments),
-                 sprintf("03_Analysis_files/ancombc_%s_bact.RDa", amendments))
+saved_files <- c(sprintf("../03_Analysis_files/deseq_%s_bact.RDa",   amendments),
+                 sprintf("../03_Analysis_files/ancombc_%s_bact.RDa", amendments))
 missing_files <- saved_files[!file.exists(saved_files)]
 if (length(missing_files) > 0)
   stop("Saved results not found:\n  ", paste(missing_files, collapse = "\n  "),
        "\nRun the DESeq2 / ANCOM-BC2 chunks of 02_Scripts/04_DAA_16S.Rmd first.")
 
-res_chicken <- readRDS("03_Analysis_files/deseq_chicken_bact.RDa")
-res_cow     <- readRDS("03_Analysis_files/deseq_cow_bact.RDa")
-res_compost <- readRDS("03_Analysis_files/deseq_compost_bact.RDa")
-res_pellet  <- readRDS("03_Analysis_files/deseq_pellet_bact.RDa")
+res_chicken <- readRDS("../03_Analysis_files/deseq_chicken_bact.RDa")
+res_cow     <- readRDS("../03_Analysis_files/deseq_cow_bact.RDa")
+res_compost <- readRDS("../03_Analysis_files/deseq_compost_bact.RDa")
+res_pellet  <- readRDS("../03_Analysis_files/deseq_pellet_bact.RDa")
 
-chicken <- readRDS("03_Analysis_files/ancombc_chicken_bact.RDa")
-cow     <- readRDS("03_Analysis_files/ancombc_cow_bact.RDa")
-compost <- readRDS("03_Analysis_files/ancombc_compost_bact.RDa")
-pellet  <- readRDS("03_Analysis_files/ancombc_pellet_bact.RDa")
+chicken <- readRDS("../03_Analysis_files/ancombc_chicken_bact.RDa")
+cow     <- readRDS("../03_Analysis_files/ancombc_cow_bact.RDa")
+compost <- readRDS("../03_Analysis_files/ancombc_compost_bact.RDa")
+pellet  <- readRDS("../03_Analysis_files/ancombc_pellet_bact.RDa")
 
 
 # ---- 4. Source the original Rmd (selected chunks only) -----------------------
@@ -205,7 +206,7 @@ skip_pattern <- paste(c("DESeq\\(", "DESeqDataSetFromMatrix", "ancombc2\\(",
 drop_pattern <- "^\\s*library\\((ANCOMBC|DESeq2|apeglm)\\)"
 
 message("Sourcing 02_Scripts/04_DAA_16S.Rmd ...")
-source_rmd_chunks("02_Scripts/04_DAA_16S.Rmd", skip_pattern, drop_pattern)
+source_rmd_chunks("04_DAA_16S.Rmd", skip_pattern, drop_pattern)
 
 # Objects now available in the session (created by the Rmd):
 #   zotu97                      filtered phyloseq object (counts, taxonomy, sample data)
@@ -377,8 +378,8 @@ if (any(direction_check[, -1] < 0, na.rm = TRUE))
 
 
 # ---- 11. Save ----------------------------------------------------------------
-saveRDS(merged_16S, "03_Analysis_files/DAA_16S_merged_long.rds")
-write_csv(merged_16S, "03_Analysis_files/DAA_16S_merged_long.csv")
+saveRDS(merged_16S, "../03_Analysis_files/DAA_16S_merged_long.rds")
+write_csv(merged_16S, "../03_Analysis_files/DAA_16S_merged_long.csv")
 message("Saved to 03_Analysis_files/DAA_16S_merged_long.{rds,csv}")
 
 # =============================================================================
