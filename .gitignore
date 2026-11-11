@@ -25,7 +25,3 @@
 03_Analysis_files/Supplementary_plot/*.png
 04_Figures/*.png
 04_Tables/*.docx
-
-# ...except the taxonomy tables, which are inputs: no script in 02_Scripts/ creates them
-!03_Analysis_files/taxonomy_16S_dada2.RDa
-!03_Analysis_files/taxonomy_ITS_dada2.RDa

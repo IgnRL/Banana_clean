@@ -167,7 +167,7 @@ saveRDS(fungi_plot, file = '../03_Analysis_files/Figure_4B_Fungi.rds')
 ## Trichoderma
 
 ```{r trichoderma ra}
-tax_dada2 <- readRDS("../01_Raw_data/dada2_trial/taxonomy_ITS_dada2.RDa")
+tax_dada2 <- readRDS("../01_Raw_data/dada2_taxonomy/taxonomy_ITS_dada2.RDa")
 zotu97 <- import_qiime("../01_Raw_data/p1031_run231023_ITS_ccs_ZOTU_c97_Count_Sintax.txt")
 
 

@@ -62,11 +62,10 @@ The soil chemistry, plant and CFU data come from the same experiment, which is d
 ```
 .
 ├── 01_Raw_data/              Input data (see "Data" below)
-│   └── dada2_trial/          DADA2 taxonomy assignment of ITS ZOTUs against UNITE
+│   └── dada2_taxonomy/       DADA2 taxonomy tables (16S, ITS) and the ITS assignment script
 ├── 02_Scripts/               R Markdown / R scripts, numbered in run order
-├── 03_Analysis_files/        DADA2 taxonomy tables (input), plus intermediate results written
-│   │                         by the scripts: DESeq2 / ANCOM-BC2 results, ggplot objects
-│   │                         (.rds/.RDa), merged tables (.csv)
+├── 03_Analysis_files/        Intermediate results written by the scripts: DESeq2 / ANCOM-BC2
+│   │                         results, ggplot objects (.rds/.RDa), merged tables (.csv)
 │   └── Supplementary_plot/   ggplot objects for the supplementary figures
 ├── 04_Figures/               Figure panels (.png) written by the scripts
 ├── 04_Tables/                Supplementary tables written by the scripts (.docx)
@@ -107,9 +106,12 @@ Raw PacBio reads are deposited in the NCBI Sequence Read Archive under BioProjec
 | `metadata_2025_soil.xlsx` | Soil chemistry per sample (pH, EC, TOM, OOM, N, P, Ca, Mg, Na, K) |
 | `plant_data.xlsx` | Plant biometric and nutrient data at final harvest (T5) |
 | `cfu_bacteria.xlsx`, `cfu_actinobacteria.xlsx`, `cfu_fungi.xlsx`, `cfu_trichoderma.xlsx` | Culture-dependent counts (CFU g⁻¹ soil) |
-| `dada2_trial/` | UNITE reference (`sh_general_release_dynamic_19.02.2025.fasta`), the DADA2 assignment script and its output |
+| `dada2_taxonomy/taxonomy_ITS_dada2.RDa` | DADA2 taxonomy of the ITS ZOTUs (UNITE), used by `04_DAA_ITS` and `05_Correlations_ITS` |
+| `dada2_taxonomy/taxonomy_16S_dada2.RDa` | DADA2 taxonomy of the 16S ZOTUs, used by `04_DAA_16S` |
+| `dada2_taxonomy/Tax_Assign_ITS_DADA2.Rmd` | Script that creates the ITS taxonomy table with DADA2 `assignTaxonomy()` |
+| `dada2_taxonomy/sh_general_release_dynamic_19.02.2025.fasta` | UNITE reference database used by the script above |
 
-The DADA2 taxonomy tables used for differential abundance (`03_Analysis_files/taxonomy_{16S,ITS}_dada2.RDa`) are precomputed and included in the repository.
+The taxonomy tables are precomputed and included in the repository, so the analysis scripts do not need to re-run the taxonomy assignment.
 
 ---
 
@@ -214,7 +216,7 @@ Reads were processed before the analyses in this repository, on the ETH Zurich E
 1. Demultiplexing with [lima](https://lima.how) v3.1.1
 2. Primer trimming and chimera removal with USEARCH v11.0.667
 3. Denoising into zero-radius OTUs (ZOTUs) with UNOISE3, then clustering at 97 % identity with UPARSE
-4. Taxonomy with SINTAX against SILVA SSU v138 (16S) and with DADA2 `assignTaxonomy()` against UNITE (ITS; see `01_Raw_data/dada2_trial/`)
+4. Taxonomy with SINTAX against SILVA SSU v138 (16S) and with DADA2 `assignTaxonomy()` against UNITE (ITS; see `01_Raw_data/dada2_taxonomy/`)
 
 Sequencing was done at the Next Generation Sequencing Platform of the University of Bern: Revio for 16S, Sequel IIe for ITS.
 
