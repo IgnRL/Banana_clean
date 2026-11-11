@@ -3,6 +3,7 @@
 [![Manuscript status: under revision](https://img.shields.io/badge/manuscript-under%20revision-orange)](#citation)
 [![Raw reads: NCBI SRA PRJNA1368706](https://img.shields.io/badge/SRA-PRJNA1368706-blue)](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA1368706)
 [![Made with R](https://img.shields.io/badge/R-4.5-276DC3?logo=r)](https://www.r-project.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 This repository contains the data and R code that produce all statistical analyses, figures and supplementary tables of:
 
@@ -147,10 +148,10 @@ The ANCOM-BC2 models in `04_DAA_*` are the slowest step. Their results are saved
    git clone https://github.com/FiBL/banana.git
    ```
 
-2. File paths in the scripts are relative to the **project root** (the folder that contains `Banana_clean.Rproj`). In RStudio, set *Knit → Knit Directory → Project Directory* before knitting, or render from the R console:
+2. File paths in the scripts are relative to the **`02_Scripts/` folder** (e.g. `../01_Raw_data/metadata_2025.csv`). This is the RStudio default, so knitting an `.Rmd` or running its chunks works without changing any setting. From the R console:
 
    ```r
-   rmarkdown::render("02_Scripts/02_Alpha_16S.Rmd", knit_root_dir = getwd())
+   rmarkdown::render("02_Scripts/02_Alpha_16S.Rmd")
    ```
 
 3. Run the scripts in numerical order. The 16S and ITS scripts are independent of each other. Within each marker, the order matters only for the differential-abundance scripts:
@@ -165,7 +166,7 @@ The ANCOM-BC2 models in `04_DAA_*` are the slowest step. Their results are saved
    04c_DAA_results_tables.R                 Tables S7 and S8 (Word)
    ```
 
-   The `.R` scripts can be run with `source()` from the project root or from `02_Scripts/`.
+   The `.R` scripts switch to `02_Scripts/` themselves, so they can be run with `source()` from the project root or from `02_Scripts/`.
 
 Each script writes its figures to `04_Figures/` (PNG) and the corresponding ggplot objects to `03_Analysis_files/` (`.rds`/`.RDa`), so panels can be restyled without re-running the models. The multi-panel figures in the manuscript were assembled from these panels.
 
@@ -250,4 +251,4 @@ For questions about the code, please [open an issue](https://github.com/FiBL/ban
 
 ## License
 
-No license has been chosen yet. Until one is added, the default copyright applies and reuse requires permission from the authors.
+The code in this repository is released under the [MIT License](LICENSE).
