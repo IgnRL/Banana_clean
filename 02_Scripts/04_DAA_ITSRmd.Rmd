@@ -237,6 +237,12 @@ ggsave(volcano_plot_deseq, file= "04_Figures/FigureX_ITS_deseq.png", width= 1900
 saveRDS(volcano_plot_deseq, file = '03_Analysis_files/FigureX_ITS_deseq.RDa')
 volcano_plot_deseq <- readRDS(file = '03_Analysis_files/FigureX_ITS_deseq.RDa')
 
+volcano_plot_deseq$data$treatment <- factor(
+  volcano_plot_deseq$data$treatment,
+  levels = c("chicken", "cow", "compost", "pellet")
+)
+
+
 volcano_plot_deseq <- volcano_plot_deseq+
   labs(x = expression(log[2]*"(Fold Change)"))+
   theme(legend.position = "none", strip.text = element_text(size = 16))+
