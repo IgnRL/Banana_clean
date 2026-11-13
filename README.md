@@ -65,7 +65,7 @@ The soil chemistry, plant and CFU data come from the same experiment, which is d
 │   └── dada2_trial/          DADA2 taxonomy assignment of ITS ZOTUs against UNITE
 ├── 02_Scripts/               R Markdown / R scripts, numbered in run order
 ├── 03_Analysis_files/        Intermediate results: saved model outputs (DESeq2, ANCOM-BC2),
-│   │                         taxonomy tables, ggplot objects (.rds/.RDa), merged tables (.csv)
+│   │                         ITS taxonomy table, ggplot objects (.rds/.RDa), merged tables (.csv)
 │   └── Supplementary_plot/   ggplot objects for the supplementary figures
 ├── 04_Figures/               Figure panels (.png) written by the scripts
 ├── 04_Tables/                Supplementary tables written by the scripts (.docx)
@@ -99,7 +99,7 @@ Raw PacBio reads are deposited in the NCBI Sequence Read Archive under BioProjec
 |---|---|
 | `p1031_run231218_Revio_16S_ZOTU_c97_Count_Sintax.txt` | 16S ZOTU (97 %) count table with SINTAX taxonomy, QIIME format |
 | `p1031_run231218_Revio_16S_ZOTU_c97.fa` | 16S representative sequences |
-| `p1031_run231023_ITS_ccs_ZOTU_c97_Count_Sintax.txt` | ITS ZOTU (97 %) count table with SINTAX taxonomy, QIIME format |
+| `p1031_run231023_ITS_ccs_ZOTU_c97_Count_Sintax.txt` | ITS ZOTU (97 %) count table, QIIME format. Its SINTAX lineage is not used: the ITS scripts replace it with the DADA2/UNITE taxonomy (see below) |
 | `p1031_run231023_ITS_ccs_ZOTU_c97.fa` | ITS representative sequences |
 | `metadata_2025.csv` | Sample metadata: `sample_name`, `time` (T0–T5), `treatment`, `rep` (A–C), `sample_ID` |
 | `metadata_2025_soil.xlsx` | Soil chemistry per sample (pH, EC, TOM, OOM, N, P, Ca, Mg, Na, K) |
@@ -107,7 +107,7 @@ Raw PacBio reads are deposited in the NCBI Sequence Read Archive under BioProjec
 | `cfu_bacteria.xlsx`, `cfu_actinobacteria.xlsx`, `cfu_fungi.xlsx`, `cfu_trichoderma.xlsx` | Culture-dependent counts (CFU g⁻¹ soil) |
 | `dada2_trial/` | UNITE reference (`sh_general_release_dynamic_19.02.2025.fasta`), the DADA2 assignment script and its output |
 
-The DADA2 taxonomy tables used for differential abundance (`03_Analysis_files/taxonomy_{16S,ITS}_dada2.RDa`) are precomputed and included in the repository.
+Taxonomy used in the analyses: **ITS** = DADA2 `assignTaxonomy()` against UNITE, precomputed in `03_Analysis_files/taxonomy_ITS_dada2.RDa` (identical copy in `dada2_trial/`) and loaded by every `*_ITS` script; **16S** = SINTAX against SILVA 138, i.e. the lineage in the 16S count table (no separate taxonomy file).
 
 ---
 

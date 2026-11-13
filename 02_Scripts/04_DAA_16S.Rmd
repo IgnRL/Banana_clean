@@ -50,9 +50,7 @@ metadata$treat.pot <- paste(metadata$treatment, metadata$rep, sep= "_")
 zotu97 <- merge_phyloseq(zotu97, sample_data(metadata))
 
 
-taxonomy_16S_dada2 <- readRDS("../03_Analysis_files/taxonomy_16S_dada2.RDa")
-
-tax_table(zotu97) <- tax_table(taxonomy_16S_dada2)
+## Taxonomy: SINTAX (SILVA) lineage from the count table, no overwrite
 ```
 
 ## Data Filtering

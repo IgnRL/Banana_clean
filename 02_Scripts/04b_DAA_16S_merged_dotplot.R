@@ -133,8 +133,10 @@ contrast_labels <- c(chicken = "Chicken", cow = "Cow",
                      compost = "Compost",       pellet = "Pellet")
 
 # Phylum colours: the same palette used for the taxonomy barplot (plotColorBarplot_16S).
-# "Chloroflexota" (the name in the dada2 taxonomy) shares the colour of
-# "Chloroflexi", and "Unclassified" (OTUs with no phylum) uses the "Unassigned" grey.
+# The taxonomy is SINTAX (SILVA 138), whose phylum names are the old ones
+# (Proteobacteria, Firmicutes, Actinobacteriota); they share the colour of the
+# modern names used in the barplot (Pseudomonadota, Bacillota, Actinomycetota).
+# "Unclassified" (OTUs with no phylum) uses the "Unassigned" grey.
 phylum_colours <- c(
   "Cyanobacteria"     = "#8DD3C7",
   "Actinomycetota"    = "#B2D8EE",
@@ -147,6 +149,9 @@ phylum_colours <- c(
   "Myxococcota"       = "#256D3D",
   "Chloroflexi"       = "#A34022",
   "Chloroflexota"     = "#A34022",
+  "Proteobacteria"    = "#FCCDE5",   # = Pseudomonadota
+  "Firmicutes"        = "#80B1D3",   # = Bacillota
+  "Actinobacteriota"  = "#B2D8EE",   # = Actinomycetota
   "Verrucomicrobiota" = "#7C4D79",
   "Unclassified"      = "gray30"
 )
@@ -318,7 +323,7 @@ counts_long <- otu_mat %>%
 sample_df <- data.frame(sample_data(zotu97)) %>%
   rownames_to_column("sample")
 
-# 7c. Taxonomy (dada2 assignment loaded in the Rmd) + the lowest assigned rank.
+# 7c. Taxonomy (SINTAX lineage loaded in the Rmd) + the lowest assigned rank.
 tax_df <- as(tax_table(zotu97), "matrix") %>%
   as.data.frame() %>%
   rownames_to_column("OTU") %>%

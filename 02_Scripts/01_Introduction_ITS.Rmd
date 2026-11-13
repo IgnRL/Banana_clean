@@ -48,6 +48,12 @@ metadata <- read.csv(
   column_to_rownames(var = "sample_name")
 
 zotu97 <- merge_phyloseq(zotu97, sample_data(metadata))
+
+## Taxonomy: DADA2 assignTaxonomy() against UNITE (not the SINTAX lineage of the count table)
+taxonomy_ITS_dada2 <- readRDS("../03_Analysis_files/taxonomy_ITS_dada2.RDa")
+tax_dada2 <- as.matrix(taxonomy_ITS_dada2[taxa_names(zotu97), , drop = FALSE])
+tax_dada2[] <- sub("^[a-z]__", "", tax_dada2)  # drop UNITE prefixes (p__, f__, ...), as import_qiime() does for SINTAX
+tax_table(zotu97) <- tax_table(tax_dada2)
 ```
 
 ## Initial exploration of the data
@@ -248,6 +254,8 @@ phylum.pal <- c(
   "Basidiomycota"  = "#F7C4B4",
   "Glomeromycota"  = "#B0E0F4",
   "Mucoromycota"   = "#D7C9E8",
+  "Chytridiomycota" = "#F2A7C3",   # DADA2/UNITE phyla >= 2 % in at least one treatment
+  "Kickxellomycota" = "#E5C29F",
   "Less than 2%"   = "#F9E77F",
   "Unassigned"     = "gray30"
 )
