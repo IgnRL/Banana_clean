@@ -194,14 +194,14 @@ Each script writes its figures to `04_Figures/` (PNG) and the corresponding ggpl
 | Fig. S5 | PCA of CLR-transformed data and PERMANOVA | `03_Beta_*` | `Supplemetary_FigureS5_{16S,ITS}.png` |
 | Fig. S6 | RDA constrained by plant variables (T5) | `03_Beta_*` | `Supplemetary_FigureS6_{16S,ITS}.png` |
 | Fig. S7 | Volcano plots, DESeq2 and ANCOM-BC2 | `04_DAA_16S.Rmd`, `04_DAA_ITSRmd.Rmd` | `FigureX_16S_revisado_2_deseq.png`, `FigureXX_16S_revisado_2_ancom.png`, `FigureX_ITS_deseq_revisado_2.png`, `FigureXXX_ITS_ancom_revisado_2.png` |
-| Fig. S8 | Actinobacteria and *Trichoderma*: CFU vs. relative abundance | `05_Correlations_16S.Rmd`, `05_Correlations_ITS.Rmd` | `Supplemetary_FigureS7_Actinobacteria.png`, `Figure_XB_trichoderma.png`, `Figure_X_trichoderma.png` |
+| Fig. S8 | Actinobacteria and *Trichoderma*: CFU vs. relative abundance | `05_Correlations_16S.Rmd`, `05_Correlations_ITS.Rmd` | `Supplementary_FigureS8A_Actinobacteria.png`, `Supplementary_FigureS8B_Trichoderma_CFU.png`, `Supplementary_FigureS8C_Trichoderma_RA.png` |
 | Table S1 | Chemistry of the organic amendments | — (from the companion study) | — |
 | Table S2 | Mixed-model results for alpha diversity | `02_Alpha_*` | printed in the knitted report |
 | Tables S3–S4 | Forward selection of soil variables for the RDA | `03_Beta_*` | printed in the knitted report |
 | Tables S5–S6 | `envfit` of plant variables | `03_Beta_*` | printed in the knitted report |
 | Tables S7–S8 | Differentially abundant OTUs (bacteria, fungi) | `04c_DAA_results_tables.R` | `04_Tables/DAA_16S_table.docx`, `04_Tables/DAA_ITS_table.docx` |
 
-Some output file names are older than the final figure numbering of the manuscript (for example `Supplemetary_FigureS7_Actinobacteria.png` is now part of Fig. S8). The table above gives the current mapping.
+Some output file names are older than the final figure numbering of the manuscript (for example the Fig. S7 volcano plots are saved as `FigureX_*` and `FigureXX_*`). The table above gives the current mapping.
 
 ---
 

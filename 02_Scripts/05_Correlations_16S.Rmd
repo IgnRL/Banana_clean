@@ -156,10 +156,10 @@ actinobacteria_plot <- ggplot(cfu_actino_join,
 actinobacteria_plot
 
 
-ggsave(actinobacteria_plot, file= "../04_Figures/Supplemetary_FigureS7_Actinobacteria.png", width= 1900,height= 1200, units= "px")
+ggsave(actinobacteria_plot, file= "../04_Figures/Supplementary_FigureS8A_Actinobacteria.png", width= 1900,height= 1200, units= "px")
 
 
-saveRDS(actinobacteria_plot, file = '../03_Analysis_files/Supplementary_plot/Supplemetary_FigureS7_Actinobacteria.rds')
+saveRDS(actinobacteria_plot, file = '../03_Analysis_files/Supplementary_plot/Supplementary_FigureS8A_Actinobacteria.rds')
 ```
 
 ## Bacteria
