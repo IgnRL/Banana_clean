@@ -47,7 +47,7 @@ metadata$treat.pot <- paste(metadata$treatment, metadata$rep, sep= "_")
 zotu97 <- merge_phyloseq(zotu97, sample_data(metadata))
 
 
-taxonomy_ITS_dada2 <- readRDS("../03_Analysis_files/taxonomy_ITS_dada2.RDa")
+taxonomy_ITS_dada2 <- readRDS("../01_Raw_data/dada2_taxonomy/taxonomy_ITS_dada2.RDa")
 
 tax_table(zotu97) <- tax_table(taxonomy_ITS_dada2)
 ```
